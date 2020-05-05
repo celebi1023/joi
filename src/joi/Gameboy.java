@@ -15,10 +15,13 @@ public class Gameboy {
 	public Gameboy(String fileName) {
 		cpu = new Cpu(fileName);
 	}
-
+	
 	public void start() {
+		int stopper = 0;
 		while(true) {
 			cpu.run();
+			stopper++;
+			//if(stopper > 800) break;
 		}
 	}
 }

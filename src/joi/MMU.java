@@ -48,11 +48,11 @@ public class MMU {
 		}
 	}
 	
-	public byte read(int address) {
-		return memory[address];
+	public int read(int address) {
+		return Byte.toUnsignedInt(memory[address]);
 	}
 	
-	public void write(int address, byte val) {
-		memory[address] = val;
+	public void write(int address, int val) {
+		memory[address] = (byte) val;
 	}
 }
