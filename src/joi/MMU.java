@@ -22,7 +22,7 @@ public class MMU {
     //FF80 - FFFE High RAM (HRAM)	
     //FFFF - FFFF Interrupts Enable Register (IE)	
 	private byte[] memory;
-	private byte[] cart;
+	private byte[] boot;
 	
 	public MMU(String fileName) {
 		memory = new byte[0x10000];
@@ -32,14 +32,15 @@ public class MMU {
 	private void openRom(String fileName) {
 		try {
 			//to fix later
-			cart = Files.readAllBytes(Paths.get("/Users/justi/joi/roms/" + fileName));
+			String startup = "DMG_ROM.bin";
+			boot = Files.readAllBytes(Paths.get("/Users/justi/joi/roms/" + startup));
 			//for conversion reference
-			int begin = 0x0100; int length = 20;
+			int begin = 0x00; int length = 20;
 			for(int i = begin; i < begin + length; i++) {
-				System.out.print(Integer.toHexString(Byte.toUnsignedInt(cart[i])) + " ");
+				System.out.print(Integer.toHexString(Byte.toUnsignedInt(boot[i])) + " ");
 			}
-			for(int i = 0; i < cart.length; i++) {
-				memory[i] = cart[i];
+			for(int i = 0; i < boot.length; i++) {
+				memory[i] = boot[i];
 			}
 			System.out.println("Successfully loaded rom into memory");
 			

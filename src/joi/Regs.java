@@ -26,7 +26,7 @@ public class Regs {
 		h = 0x01;
 		l = 0x4D;
 		sp = 0xFFFE;
-		pc = 0x0100;
+		pc = 0x0000;
 		zero = true;
 		sub = false;
 		half = true;
@@ -48,10 +48,19 @@ public class Regs {
 	public void setSP(int val)	{sp = val;}
 	public void setPC(int val)	{pc = val;}
 	
+	public void setBC(int val) {
+		b = val/256;
+		c = val % 256;
+	}
+	
+	public void setDE(int val) {
+		d = val/256;
+		e = val % 256;
+	}
+	
 	public void setHL(int val) {
 		h = val/256;
 		l = val % 256;
-		//System.out.println(Integer.toHexString(h) + " " + Integer.toHexString(l));
 	}
 	
 	//get
@@ -70,9 +79,10 @@ public class Regs {
 	public boolean getHalf() {return half;}
 	public boolean getCarry() {return carry;}
 	
-	public int getHL() {
-		return h * 256 + l;
-	}
+	public int getAF() {return a * 256 + f;}
+	public int getBC() {return b * 256 + c;}
+	public int getDE() {return d * 256 + e;}
+	public int getHL() {return h * 256 + l;}
 	
 	public String getZSHC()	{
 		String output = "";
@@ -85,10 +95,14 @@ public class Regs {
 	
 	//ALU in some sense
 	private void updateF() {
-		if(zero) f = f & 0b10000000;
-		if(sub) f = f & 0b01000000;
-		if(half) f = f & 0b00100000;
-		if(carry) f = f & 0b00010000;
+		if(zero) f = f | 0b10000000;
+		else f = f & 0b01111111;
+		if(sub) f = f | 0b01000000;
+		else f = f & 0b10000000;
+		if(half) f = f | 0b00100000;
+		else f = f & 0b11011111;
+		if(carry) f = f | 0b00010000;
+		else f = f & 0b11101111;
 	}
 	
 	public int setFlags(int val) {
@@ -106,6 +120,7 @@ public class Regs {
 		half = a < b;
 		carry = false; //a guess
 		updateF();
+		System.out.println("updateF: " + Integer.toHexString(f));
 		return a - b;
 	}
 	
@@ -113,6 +128,49 @@ public class Regs {
 		zero = a == b;
 		sub = true;
 		//TODO
-		return a - b; 
+		return (a - b + 256) % 256; 
+	}
+	
+	public int addByte(int a, int b) {
+		zero = a + b % 256 == 0;
+		sub = false;
+		half = (a % 16) + (b % 16) > 16; //to be checked
+		return a + b % 256;
+	}
+	
+	public int rotateByteLeft(int val) {
+		int lastbit = (val % 2 == 0) ? 0b11111110 : 0b11111111;
+		int result = (val << 1) & lastbit;
+		half = false;
+		sub = false;
+		carry = val > 127; //old bit 7 was 1
+		System.out.println("result: " + result);
+		return result % 256;
+	}
+	
+	public int rotateByteLeftCarry(int val) {
+		zero = !carry && val > 2;
+		sub = false;
+		half = false;
+		int result = carry ? (val << 1) + 1 : val << 1;
+		carry = val/2 > 0;
+		return result % 256;
+	}
+	
+	public int rotateByteRightCarry(int val) {
+		zero = !carry && val/2 == 0;
+		sub = false;
+		half = false;
+		int result = carry ? (val >> 1) + 128 : val >> 1;
+		carry = (val % 2) == 1;
+		return result % 256;
+	}
+	
+	public void checkByteBit(int val, int bitIndex) {
+		val = (val >> bitIndex) % 2;
+		zero = val == 0;
+		sub = false;
+		half = true;
+		//no carry then?
 	}
 }

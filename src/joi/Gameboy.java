@@ -21,7 +21,7 @@ public class Gameboy {
 		while(true) {
 			cpu.run();
 			stopper++;
-			//if(stopper > 800) break;
+			//if(stopper > 100) break;
 		}
 	}
 }

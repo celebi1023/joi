@@ -27,13 +27,51 @@ public class Cpu {
 			regs.setPC(address);
 	}
 	
+	public void pushByte(int val) {
+		regs.setSP(regs.getSP() - 1);
+		//System.out.println("sp: " + Integer.toHexString(regs.getSP()) + " val: " + Integer.toHexString(val));
+		mmu.write(regs.getSP(), val);
+	}
+	
+	public void pushWord(int val) {
+		pushByte(val/256);
+		pushByte(val%256);
+	}
+	
+	public int popByte() {
+		int result = mmu.read(regs.getSP());
+		regs.setSP(regs.getSP() + 1);
+		return result;
+	}
+	
+	public int popWord() {
+		int low = popByte();
+		int high = popByte();
+		return high * 256 + low;
+	}
+	
+	public void call(int toJump, boolean condition) {
+		if(condition) {
+			pushWord(regs.getPC());
+			regs.setPC(toJump);
+		}
+	}
+	
+	public void ret(boolean condition) {
+		if(condition) {
+			regs.setPC(popWord());
+		}
+	}
+	
 	
 	//returns number of cycles running the instruction took
 	public int run() {
 		int opCode = fetchByte();
 		System.out.print("Current ins: " + Integer.toHexString(opCode));
 		System.out.print("\t   Current PC: " + Integer.toHexString(regs.getPC() - 1));
-		System.out.println("\tzsfcL " + regs.getZSHC());
+		System.out.print("\tzsfc: " + regs.getZSHC());
+		System.out.println("\tdesired reg: " + Integer.toHexString(regs.getC()));
+		//System.out.println("0xff44: " + mmu.read(0xff44));
 		switch(opCode) {
 		//nop
 			case 0x00: return 4;
@@ -44,7 +82,38 @@ public class Cpu {
 				return 4;
 			}
 			
+			case 0x0d: {
+				regs.setC(regs.subByte(regs.getC(), 1));
+				return 4;
+			}
+			
+		//inc
+			case 0x03:{//inc bc
+				regs.setBC(regs.getBC() + 1);
+				return 8;
+			}
+			case 0x13:{//inc bc
+				regs.setDE(regs.getDE() + 1);
+				return 8;
+			}
+			case 0x0c: {
+				regs.setC(regs.getC() + 1);
+				return 4;
+			}
+			case 0x23: {//inc hl
+				regs.setHL(regs.getHL() + 1);
+				return 8;
+			}
+			case 0x33:{//inc sp
+				regs.setSP(regs.getSP() + 1);
+				return 8;
+			}
+			
 		//8-bit load //i guess loads don't trigger flags?
+			case 0x3e: {
+				regs.setA(fetchByte());
+				return 8;
+			}
 			case 0x06: {
 				regs.setB(fetchByte()); 
 				return 8;
@@ -55,22 +124,247 @@ public class Cpu {
 			}
 			
 		//16-bit load
+			case 0x11: {
+				regs.setDE(fetchWord());
+				return 12;
+			}
+			
 			case 0x21: {
 				regs.setHL(fetchWord());	
 				return 12;
 			}
 			
+			case 0x31: {
+				regs.setSP(fetchWord());
+				return 12;
+			}
+		//load reg into reg
+			case 0x4f: {
+				regs.setC(regs.getA());
+				return 4;
+			}
+			case 0x7f: {//ld A, A
+				regs.setA(regs.getA());
+				return 4;
+			}
+			case 0x78: {//ld A, B
+				regs.setA(regs.getB());
+				return 4;
+			}
+			case 0x79: {//ld A, C
+				regs.setA(regs.getC());
+				return 4;
+			}
+			case 0x7a: {//ld A, D
+				regs.setA(regs.getD());
+				return 4;
+			}
+			case 0x7b: {//ld A, E
+				regs.setA(regs.getE());
+				return 4;
+			}
+			case 0x7c: {//ld A, H
+				regs.setA(regs.getH());
+				return 4;
+			}
+			case 0x7d: {//ld A, L
+				regs.setA(regs.getL());
+				return 4;
+			}
+			case 0x40: {//ld B, B
+				regs.setB(regs.getB());
+				return 4;
+			}
+			case 0x41: {//ld B, C
+				regs.setB(regs.getC());
+				return 4;
+			}
+			case 0x42: {//ld B, D
+				regs.setB(regs.getD());
+				return 4;
+			}
+			case 0x43: {//ld B, E
+				regs.setB(regs.getE());
+				return 4;
+			}
+			case 0x44: {//ld B, H
+				regs.setB(regs.getH());
+				return 4;
+			}
+			case 0x45: {//ld B, L
+				regs.setB(regs.getL());
+				return 4;
+			}
+			case 0x48: {//ld C, B
+				regs.setC(regs.getB());
+				return 4;
+			}
+			case 0x49: {//ld C, C
+				regs.setC(regs.getC());
+				return 4;
+			}
+			case 0x4a: {//ld C, D
+				regs.setC(regs.getD());
+				return 4;
+			}
+			case 0x4b: {//ld C, E
+				regs.setC(regs.getE());
+				return 4;
+			}
+			case 0x4c: {//ld C, H
+				regs.setC(regs.getH());
+				return 4;
+			}
+			case 0x4d: {//ld C, L
+				regs.setC(regs.getL());
+				return 4;
+			}
+			case 0x50: {//ld D, B
+				regs.setD(regs.getB());
+				return 4;
+			}
+			case 0x51: {//ld D, C
+				regs.setD(regs.getC());
+				return 4;
+			}
+			case 0x52: {//ld D, D
+				regs.setD(regs.getD());
+				return 4;
+			}
+			case 0x53: {//ld D, E
+				regs.setD(regs.getE());
+				return 4;
+			}
+			case 0x54: {//ld D, H
+				regs.setD(regs.getH());
+				return 4;
+			}
+			case 0x55: {//ld D, L
+				regs.setD(regs.getL());
+				return 4;
+			}
+			case 0x58: {//ld E, B
+				regs.setE(regs.getB());
+				return 4;
+			}
+			case 0x59: {//ld E, C
+				regs.setE(regs.getC());
+				return 4;
+			}
+			case 0x5a: {//ld E, D
+				regs.setE(regs.getD());
+				return 4;
+			}
+			case 0x5b: {//ld E, E
+				regs.setE(regs.getE());
+				return 4;
+			}
+			case 0x5c: {//ld E, H
+				regs.setE(regs.getH());
+				return 4;
+			}
+			case 0x5d: {//ld E, L
+				regs.setE(regs.getL());
+				return 4;
+			}
+			case 0x60: {//ld H, B
+				regs.setH(regs.getB());
+				return 4;
+			}
+			case 0x61: {//ld H, C
+				regs.setH(regs.getC());
+				return 4;
+			}
+			case 0x62: {//ld H, D
+				regs.setH(regs.getD());
+				return 4;
+			}
+			case 0x63: {//ld H, E
+				regs.setH(regs.getE());
+				return 4;
+			}
+			case 0x64: {//ld H, H
+				regs.setH(regs.getH());
+				return 4;
+			}
+			case 0x65: {//ld H, L
+				regs.setH(regs.getL());
+				return 4;
+			}
+			case 0x68: {//ld L, B
+				regs.setL(regs.getB());
+				return 4;
+			}
+			case 0x69: {//ld L, C
+				regs.setL(regs.getC());
+				return 4;
+			}
+			case 0x6a: {//ld L, D
+				regs.setL(regs.getD());
+				return 4;
+			}
+			case 0x6b: {//ld L, E
+				regs.setL(regs.getE());
+				return 4;
+			}
+			case 0x6c: {//ld L, H
+				regs.setL(regs.getH());
+				return 4;
+			}
+			case 0x6d: {//ld L, L
+				regs.setL(regs.getL());
+				return 4;
+			}
+			
 		//load reg to mem
+			case 0x22: { //LD(HDI) A
+				mmu.write(regs.getHL(), regs.getA());
+				regs.setHL(regs.getHL() + 1);
+				return 8;
+			}
 			case 0x32: {
 				mmu.write(regs.getHL(), regs.getA());
 				regs.setHL(regs.getHL() - 1);
 				return 8;
 			}
+			
+			case 0x77: {
+				mmu.write(regs.getHL(), regs.getA());
+				return 8;
+			}
+			
+			case 0xe2: {
+				mmu.write(0xFF00 + regs.getC(), regs.getA());
+				return 8;
+			}
 				
+			case 0xE0: { //put a into FF00 + n
+				mmu.write(0xFF00 + fetchByte(), regs.getA());
+				return 12;
+			}
+			
+		//load mem to reg
+			case 0x1a: {
+				regs.setA(mmu.read(regs.getDE()));
+				return 8;
+			}
+			case 0x7e: {//ld A, (HL)
+				regs.setA(mmu.read(regs.getHL()));
+				return 8;
+			}
+			case 0xF0: {
+				regs.setA(mmu.read(0xFF00 + fetchByte()));
+				return 12;
+			}
 			
 		//xor
 			case 0xaf: {
 				regs.setA(regs.setFlags(regs.getA() ^ regs.getA()));
+				return 4;
+			}
+		//rotate
+			case 0x17: {
+				regs.setA(regs.rotateByteLeftCarry(regs.getA()));
 				return 4;
 			}
 			
@@ -80,21 +374,92 @@ public class Cpu {
 				return 8;
 			}
 			
+			case 0xc3: {
+				jump(fetchWord(), true); //i don't think flags are affected? not sure
+				return 16;
+			}
 			
-			case 0xc3: jump(fetchWord(), true);	return 16; //i don't think flags are affected? not sure
+		//push
+			case 0xc5: {//push bc
+				//System.out.println("preBC: " + Integer.toHexString(regs.getBC()));
+				pushWord(regs.getBC());
+				return 16;
+			}
+		//pop
+			case 0xc1: {//pop bc
+				regs.setBC(popWord());
+				//System.out.println("afterBC: " + Integer.toHexString(regs.getBC()));
+				return 12;
+			}
+		//call
+			case 0xcd: {
+				call(fetchWord(), true);
+				return 12;
+			}
+		//return
+			case 0xc9: {
+				ret(true);
+				return 8;
+			}
 			
+		//cb
+			case 0xcb:{
+				int followIns = fetchByte();
+				System.out.println("follow cb: " + Integer.toHexString(followIns));
+				switch(followIns) {
+					case 0x07:{
+						regs.setA(regs.rotateByteLeft(regs.getA()));
+						return 8;
+					}
+					case 0x11:{//rl c
+						regs.setC(regs.rotateByteLeftCarry(regs.getC()));
+						return 8;
+					}
+					case 0x7c:{
+						regs.checkByteBit(regs.getH(), 7);
+						return 8;
+					}
+					default:{
+						//System.out.println(toWord(regs.getSP()));
+						System.out.println("AF: " + toWord(regs.getAF()));
+						System.out.println("BC: " + toWord(regs.getBC()));
+						System.out.println("DE: " + toWord(regs.getDE()));
+						System.out.println("HL: " + toWord(regs.getHL()));
+						System.out.println("Unrecognized cb instruction: " + Integer.toHexString(followIns));
+						System.out.println("PC: 0x" + Integer.toHexString((regs.getPC()-1)));
+						System.exit(1);
+					}
+				}
+			}
+			
+		//Disable interrupt 
+			case 0xF3: {
+				//TODO
+				return 4;
+			}
 			
 			default:
-				//System.out.println(Integer.toHexString(regs.getB()));
+				//System.out.println("carry : " + regs.getCarry() + " " + Integer.toBinaryString(regs.rotateByteRightCarry(0b10110111)) + " carry : " + regs.getCarry());
+				//System.out.println(toWord(regs.getSP()));
+				System.out.println("AF: " + toWord(regs.getAF()));
+				System.out.println("BC: " + toWord(regs.getBC()));
+				System.out.println("DE: " + toWord(regs.getDE()));
+				System.out.println("HL: " + toWord(regs.getHL()));
 				System.out.println("Unrecognized instruction: " + Integer.toHexString(opCode));
 				System.out.println("PC: 0x" + Integer.toHexString((regs.getPC()-1)));
 				System.exit(1);
 		}
 		
-		
 		return 0;
 	}
 	
-
+	public String toWord(int val){ //only for printing
+		String temp = Integer.toHexString(val);
+		String result = "";
+		for(int i = 0; i < 4-temp.length(); i++)
+			result += '0';
+		result += temp;
+		return result;
+	}
 	
 }
