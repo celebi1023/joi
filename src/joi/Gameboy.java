@@ -1,7 +1,5 @@
 package joi;
 
-import java.io.*;
-
 public class Gameboy {
 	
 	private Cpu cpu;
@@ -13,13 +11,14 @@ public class Gameboy {
 	}
 	
 	public Gameboy(String fileName) {
-		cpu = new Cpu(fileName);
+		MMU memory = new MMU(fileName);
+		cpu = new Cpu(memory);
 	}
 	
 	public void start() {
 		int stopper = 0;
 		while(true) {
-			cpu.run();
+			cpu.step();
 			stopper++;
 			//if(stopper > 100) break;
 		}
