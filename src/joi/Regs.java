@@ -106,7 +106,7 @@ public class Regs {
 	}
 	
 	public int setFlags(int val) {
-		zero = val == 0;
+		zero = val % 256 == 0;
 		sub = false;
 		half = false;
 		carry = false;
@@ -115,21 +115,24 @@ public class Regs {
 	}
 	
 	public int subByte(int a, int b) {
-		zero = a == b;
+		zero = (a % 256) == (b % 256);
 		sub = true;
-		half = a < b;
-		carry = false; //a guess
+		half = (a % 16) < (b % 16);
+		carry = a < b;
 		updateF();
-		System.out.println("updateF: " + Integer.toHexString(f));
-		return a - b;
+		return (a - b + 256) % 256;
 	}
 	
+	/*
 	public int subWord(int a, int b) {
 		zero = a == b;
 		sub = true;
-		//TODO
-		return (a - b + 256) % 256; 
+		half = (a % 256) < (b % 256);
+		carry = a < b;
+		updateF();
+		return (a - b + 256*256) % 256*256; 
 	}
+	*/
 	
 	public int addByte(int a, int b) {
 		zero = a + b % 256 == 0;

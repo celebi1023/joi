@@ -1,11 +1,8 @@
 package joi;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
 
 public class MMU {
 	// various MMU components: WRAM, VRAM, etc.
@@ -32,7 +29,8 @@ public class MMU {
 	private void openRom(String fileName) {
 		try {
 			//to fix later
-			String startup = "DMG_ROM.bin";
+			//String startup = "DMG_ROM.bin";
+			String startup = "BootRomMod.bin";
 			boot = Files.readAllBytes(Paths.get("/Users/justi/joi/roms/" + startup));
 			//for conversion reference
 			int begin = 0x00; int length = 20;
