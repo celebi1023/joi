@@ -18,6 +18,7 @@ public class PPU {
 	}
 
 	public void step(int cycleIncrease) { //cycle increase could be incorrect, gonna use it like this for now
+		System.out.println("\tcycles: " + cycles + " scanline: " + scanline + " mode: " + mode);
 		cycles += cycleIncrease;
 		switch(mode) {
 			case modeOAM: {
