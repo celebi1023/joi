@@ -5,9 +5,9 @@ public class Cpu {
 	private MMU mmu;
 	short writeAdddress;
 	
-	public Cpu(String fileName) {
+	public Cpu(MMU m) {
 		regs = new Regs();
-		mmu = new MMU(fileName);
+		mmu = m;
 	}
 	
 	public int fetchByte() {
@@ -65,7 +65,7 @@ public class Cpu {
 	
 	
 	//returns number of cycles running the instruction took
-	public int run() {
+	public int step() {
 		int opCode = fetchByte();
 		System.out.print("Current ins: " + Integer.toHexString(opCode));
 		System.out.print("\t   Current PC: " + Integer.toHexString(regs.getPC() - 1));
