@@ -5,9 +5,9 @@ public class Cpu {
 	private MMU mmu;
 	short writeAdddress;
 	
-	public Cpu(String fileName) {
+	public Cpu(MMU m) {
 		regs = new Regs();
-		mmu = new MMU(fileName);
+		mmu = m;
 	}
 	
 	public int fetchByte() {
@@ -65,7 +65,7 @@ public class Cpu {
 	
 	
 	//returns number of cycles running the instruction took
-	public int run() {
+	public int step() {
 		int opCode = fetchByte();
 		System.out.print("Current ins: " + Integer.toHexString(opCode));
 		System.out.print("\t   Current PC: " + Integer.toHexString(regs.getPC() - 1));
@@ -77,13 +77,32 @@ public class Cpu {
 			case 0x00: return 4;
 			
 		//dec
-			case 0x05: {
+			case 0x3d: {//dec a
+				regs.setA(regs.subByte(regs.getA(), 1));
+				return 4;
+			}
+			case 0x05: {//dec b
 				regs.setB(regs.subByte(regs.getB(), 1)); 
 				return 4;
 			}
-			
-			case 0x0d: {
+			case 0x0d: {//dec c
 				regs.setC(regs.subByte(regs.getC(), 1));
+				return 4;
+			}
+			case 0x15: {//dec d
+				regs.setD(regs.subByte(regs.getD(), 1));
+				return 4;
+			}
+			case 0x1d: {//dec e
+				regs.setE(regs.subByte(regs.getE(), 1));
+				return 4;
+			}
+			case 0x25: {//dec h
+				regs.setH(regs.subByte(regs.getH(), 1));
+				return 4;
+			}
+			case 0x2d: {//dec l
+				regs.setL(regs.subByte(regs.getL(), 1));
 				return 4;
 			}
 			
@@ -109,17 +128,33 @@ public class Cpu {
 				return 8;
 			}
 			
-		//8-bit load //i guess loads don't trigger flags?
+		//8-bit load 
 			case 0x3e: {
 				regs.setA(fetchByte());
 				return 8;
 			}
-			case 0x06: {
+			case 0x06: {//ld b, n
 				regs.setB(fetchByte()); 
 				return 8;
 			}
-			case 0x0e: {
+			case 0x0e: {//ld c, n
 				regs.setC(fetchByte()); 
+				return 8;
+			}
+			case 0x16: {//ld d, n
+				regs.setD(fetchByte()); 
+				return 8;
+			}
+			case 0x1e: {//ld e, n
+				regs.setE(fetchByte()); 
+				return 8;
+			}
+			case 0x26: {//ld h, n
+				regs.setH(fetchByte()); 
+				return 8;
+			}
+			case 0x2e: {//ld l, n
+				regs.setL(fetchByte()); 
 				return 8;
 			}
 			
@@ -317,6 +352,14 @@ public class Cpu {
 			}
 			
 		//load reg to mem
+			case 0x02: { //ld (bc), a
+				mmu.write(regs.getBC(), regs.getA());
+				return 8;
+			}
+			case 0x12: { //ld (de), a
+				mmu.write(regs.getDE(), regs.getA());
+				return 8;
+			}
 			case 0x22: { //LD(HDI) A
 				mmu.write(regs.getHL(), regs.getA());
 				regs.setHL(regs.getHL() + 1);
@@ -328,7 +371,7 @@ public class Cpu {
 				return 8;
 			}
 			
-			case 0x77: {
+			case 0x77: {//ld(hl), a
 				mmu.write(regs.getHL(), regs.getA());
 				return 8;
 			}
@@ -341,6 +384,10 @@ public class Cpu {
 			case 0xE0: { //put a into FF00 + n
 				mmu.write(0xFF00 + fetchByte(), regs.getA());
 				return 12;
+			}
+			case 0xEA: {//ld (nn), A
+				mmu.write(fetchWord(), regs.getA());
+				return 16;
 			}
 			
 		//load mem to reg
@@ -356,7 +403,43 @@ public class Cpu {
 				regs.setA(mmu.read(0xFF00 + fetchByte()));
 				return 12;
 			}
-			
+		//compare
+			case 0xbf: { //cp A, A
+				regs.subByte(regs.getA(), regs.getA());
+				return 4;
+			}
+			case 0xb8: { //cp A, B
+				regs.subByte(regs.getA(), regs.getB());
+				return 4;
+			}
+			case 0xb9: { //cp A, C
+				regs.subByte(regs.getA(), regs.getC());
+				return 4;
+			}
+			case 0xba: { //cp A, D
+				regs.subByte(regs.getA(), regs.getD());
+				return 4;
+			}
+			case 0xbb: { //cp A, E
+				regs.subByte(regs.getA(), regs.getE());
+				return 4;
+			}
+			case 0xbc: { //cp A, H
+				regs.subByte(regs.getA(), regs.getH());
+				return 4;
+			}
+			case 0xbd: { //cp A, L
+				regs.subByte(regs.getA(), regs.getL());
+				return 4;
+			}
+			case 0xbe: { //cp A, (hl)
+				regs.subByte(regs.getA(), mmu.read(regs.getHL()));
+				return 8;
+			}
+			case 0xfe: { //cp A, #
+				regs.subByte(regs.getA(), fetchByte());
+				return 8;
+			}
 		//xor
 			case 0xaf: {
 				regs.setA(regs.setFlags(regs.getA() ^ regs.getA()));
@@ -369,14 +452,32 @@ public class Cpu {
 			}
 			
 		//jump	
-			case 0x20: {
+			case 0xc3: {//jp nn
+				jump(fetchWord(), true); //i don't think flags are affected? not sure
+				return 16;
+			}
+			case 0xe9: {//jr (HL)
+				jump(regs.getHL(), true);
+			}
+			case 0x18: {//jr n
+				jump((byte) fetchByte() + regs.getPC(), true);
+				return 8;
+			}
+			case 0x20: {//jr nz, n
 				jump((byte) fetchByte() + regs.getPC(), !regs.getZero()); 
 				return 8;
 			}
-			
-			case 0xc3: {
-				jump(fetchWord(), true); //i don't think flags are affected? not sure
-				return 16;
+			case 0x28: {//jr z, n
+				jump((byte) fetchByte() + regs.getPC(), regs.getZero()); 
+				return 8;
+			}
+			case 0x30: {//jr nc, n
+				jump((byte) fetchByte() + regs.getPC(), !regs.getCarry()); 
+				return 8;
+			}
+			case 0x38: {//jr c, n
+				jump((byte) fetchByte() + regs.getPC(), regs.getCarry()); 
+				return 8;
 			}
 			
 		//push
