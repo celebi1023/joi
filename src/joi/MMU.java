@@ -75,7 +75,8 @@ public class MMU {
 		try {
 			//to fix later
 			String startup = "BootRomMod.bin";
-			boot = Files.readAllBytes(Paths.get("/Users/justi/joi/roms/" + startup));
+			boot = Files.readAllBytes(Paths.get("D:/Study/UTAustin/CS429H/joi/roms/" + startup));
+			
 			/*
 			int begin = 0x00; int length = 20;
 			for(int i = begin; i < begin + length; i++) {

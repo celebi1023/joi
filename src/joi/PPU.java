@@ -25,6 +25,7 @@ public class PPU {
 	
 	
 	MMU mmu;
+	Display monitor;
 	int mode; //which stage the ppu is in
 	int cycles;
 	int scanline;
@@ -33,6 +34,7 @@ public class PPU {
 	
 	public PPU(MMU m) {
 		mmu = m;
+		monitor = new Display(160, 144);
 		mode = modeOAM; //no idea
 		windowBuffer = new int[144][160];
 	}
@@ -109,7 +111,8 @@ public class PPU {
 						}
 						//UPDATE SCREEN -------------------------------
 						//window buffer is ready
-						
+						monitor.render(windowBuffer, true);
+						monitor.showAsFrame();
 					}
 					else {
 						mode = modeOAM;
