@@ -22,8 +22,9 @@ public class MMU {
 	private byte[] memory;
 	private byte[] boot;
 	private int[][] tileSet;
-	private int[][] tileMap0;
+	public int[][] tileMap0; //is this bad practice lol idk
 	private int[][] returnTile; //used for getTile()
+	public boolean pause; //strictly for testing@!!!!!!!!!!!!!!!!
 	
 	public MMU(String fileName) {
 		memory = new byte[0x10000];
@@ -31,6 +32,7 @@ public class MMU {
 		tileSet = new int[1000][16]; //for now: starting from 8800, 1000 tiles x 16 bytes
 		tileMap0 = new int[32][32]; //for now: starting from 
 		returnTile = new int[8][8];
+		pause = false;
 	}
 	
 	public void write(int address, int val) {
@@ -113,6 +115,21 @@ public class MMU {
 			}
 			System.out.println();
 		}
+	}
+	
+	public void backgroundSum() {
+		int sum = 0;
+		for(int i = 0; i < 32; i++) {
+			for(int j = 0; j < 32; j++) {
+				int[][]temp = getTile(tileMap0[i][j]);
+				for(int k = 0; k < 8; k++) {
+					for(int l = 0; l < 8; l++) {
+						sum += temp[k][l];
+					}
+				}
+			}
+		}
+		System.out.println(sum);
 	}
 
 }

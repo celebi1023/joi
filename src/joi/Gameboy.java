@@ -4,6 +4,7 @@ public class Gameboy {
 	
 	private Cpu cpu;
 	private PPU ppu;
+	static boolean pause = false; //strictly for testing
 
 	public static void main(String[] args) {
 		System.out.println("Hello world");

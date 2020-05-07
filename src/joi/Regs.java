@@ -139,6 +139,7 @@ public class Regs {
 		zero = a + b % 256 == 0;
 		sub = false;
 		half = (a % 16) + (b % 16) > 16; //to be checked
+		carry = (a + 256 % 256) + (b + 256 % 256) > 255; //iffy, to be checked maybe
 		return a + b % 256;
 	}
 	
