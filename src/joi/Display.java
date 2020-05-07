@@ -20,8 +20,9 @@ public class Display extends JPanel{
 	
 	BufferedImage canvas;
 	Graphics g;
-	int width = 170;
-	int height = 150;
+	int mult = 1;
+	int width = 160*mult;
+	int height = 144*mult;
 	boolean painting = false;
 	
 	Color[] colors = new Color[4];{
@@ -31,8 +32,8 @@ public class Display extends JPanel{
 		colors[3]=Color.BLACK;
 	}
 	
-    public Display(int width, int height) {
-    	canvas = new BufferedImage(width, height, BufferedImage.TYPE_INT_BGR);
+    public Display(int w, int h) {
+    	canvas = new BufferedImage(width*mult, height*mult, BufferedImage.TYPE_INT_BGR);
 		g = canvas.getGraphics();
     }
     
@@ -56,9 +57,9 @@ public class Display extends JPanel{
 	public void render(int[][] pattern, boolean draw){
 		if(draw & !painting) {
 			clear();
-			for(int i = 0; i < pattern.length; i++) {
-				for(int j = 0; j < pattern[0].length; j++) {
-					setPixel(j,i, pattern[i][j]);
+			for(int i = 0; i < pattern.length*mult; i++) {
+				for(int j = 0; j < pattern[0].length*mult; j++) {
+					setPixel(j,i, pattern[i/mult][j/mult]);
 				}
 			}
 			g.setColor(Color.BLACK);
@@ -113,7 +114,7 @@ public class Display extends JPanel{
 			frame = new JFrame("NES Test");
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			frame.getContentPane().add(this);
-			frame.setResizable(false);;
+			frame.setResizable(true);;
 			frame.pack();
 			frame.setVisible(true);
 		}
