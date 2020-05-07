@@ -26,15 +26,14 @@ public class Display extends JPanel{
 	
 	Color[] colors = new Color[4];{
 		colors[0]=Color.WHITE;
-		colors[1]=Color.LIGHT_GRAY;
+		colors[1]=Color.BLACK;
 		colors[2]=Color.DARK_GRAY;
 		colors[3]=Color.BLACK;
 	}
 	
-    public Display(int width, int height, MMU m) {
+    public Display(int width, int height) {
     	canvas = new BufferedImage(width, height, BufferedImage.TYPE_INT_BGR);
 		g = canvas.getGraphics();
-		mmu = m;
     }
     
     public void clear(){
@@ -54,12 +53,12 @@ public class Display extends JPanel{
 		}
 	}
 	
-	public void render(byte[][] pattern, boolean draw){
+	public void render(int[][] pattern, boolean draw){
 		if(draw & !painting) {
 			clear();
 			for(int i = 0; i < pattern.length; i++) {
 				for(int j = 0; j < pattern[0].length; j++) {
-					setPixel(i,j, pattern[i][j]);
+					setPixel(j,i, pattern[i][j]);
 				}
 			}
 			g.setColor(Color.BLACK);
@@ -97,7 +96,7 @@ public class Display extends JPanel{
         repaint();
     }
 
-    public void drawRect(Color c, int x1, int y1, int width, int height) {
+/*    public void drawRect(Color c, int x1, int y1, int width, int height) {
         int color = c.getRGB();
         // Implement rectangle drawing
         for (int x = x1; x < x1 + width; x++) {
@@ -106,7 +105,7 @@ public class Display extends JPanel{
             }
         }
         repaint();
-    }
+    }*/
     
     
     public void showAsFrame(){
