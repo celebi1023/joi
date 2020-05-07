@@ -24,8 +24,7 @@ public class Display extends JPanel{
 	int height = 150;
 	boolean painting = false;
 	
-	Color[] colors = new Color[64];
-	{
+	Color[] colors = new Color[4];{
 		colors[0]=Color.WHITE;
 		colors[1]=Color.LIGHT_GRAY;
 		colors[2]=Color.DARK_GRAY;
@@ -54,6 +53,20 @@ public class Display extends JPanel{
 			repaint();
 		}
 	}
+	
+	public void render(byte[][] pattern, boolean draw){
+		if(draw & !painting) {
+			clear();
+			for(int i = 0; i < pattern.length; i++) {
+				for(int j = 0; j < pattern[0].length; j++) {
+					setPixel(i,j, pattern[i][j]);
+				}
+			}
+			g.setColor(Color.BLACK);
+			refresh();
+		}
+	}
+	
 	
 	@Override
 	public void paint(Graphics g) {
@@ -95,6 +108,7 @@ public class Display extends JPanel{
         repaint();
     }
     
+    
     public void showAsFrame(){
 		if(frame == null){
 			frame = new JFrame("NES Test");
@@ -104,7 +118,7 @@ public class Display extends JPanel{
 			frame.pack();
 			frame.setVisible(true);
 		}
-	}
+    }
 
 
 
