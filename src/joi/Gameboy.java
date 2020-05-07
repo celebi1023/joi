@@ -7,8 +7,8 @@ public class Gameboy {
 
 	public static void main(String[] args) {
 		System.out.println("Hello world");
-		//Gameboy gb = new Gameboy("tetris.gb");
-		//gb.start();
+		Gameboy gb = new Gameboy("tetris.gb");
+		gb.start();
 	}
 	
 	public Gameboy(String fileName) {
@@ -20,14 +20,13 @@ public class Gameboy {
 	public void start() {
 		int stopper = 0;
 		while(true) {
-			System.err.print("test");
-			System.exit(1);
 			int cycleIncrease = cpu.step();
-			System.err.print("test");
-			System.exit(1);
 			ppu.step(cycleIncrease);
+			
+			
+			
 			stopper++;
-			if(stopper > 100) break;
+			//if(stopper > 100) break;
 		}
 	}
 }

@@ -47,6 +47,7 @@ public class Regs {
 	public void setL(int val)	{l = val(val);}
 	public void setSP(int val)	{sp = val;}
 	public void setPC(int val)	{pc = val;}
+	public void setCarry(boolean b) {carry = b;} //just for testing
 	
 	public void setBC(int val) {
 		b = val/256;
@@ -156,7 +157,7 @@ public class Regs {
 		sub = false;
 		half = false;
 		int result = carry ? (val << 1) + 1 : val << 1;
-		carry = val/2 > 0;
+		carry = val > 127;
 		return result % 256;
 	}
 	

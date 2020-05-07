@@ -1,5 +1,7 @@
 package joi;
 
+import java.util.Arrays;
+
 public class Cpu {
 	private Regs regs;
 	private MMU mmu;
@@ -67,11 +69,20 @@ public class Cpu {
 	//returns number of cycles running the instruction took
 	public int step() {
 		int opCode = fetchByte();
+		
 		System.out.print("Current ins: " + Integer.toHexString(opCode));
 		System.out.print("\t   Current PC: " + Integer.toHexString(regs.getPC() - 1));
 		System.out.print("\tzsfc: " + regs.getZSHC());
 		System.out.println("\tdesired reg: " + Integer.toHexString(regs.getC()));
-		//System.out.println("0xff44: " + mmu.read(0xff44));
+		
+		
+		//for testing
+		
+		if(regs.getPC() - 1 == 0x006a) {
+			//mmu.printBackground();
+			//System.exit(1);
+		}
+		
 		switch(opCode) {
 		//nop
 			case 0x00: return 4;
@@ -174,10 +185,7 @@ public class Cpu {
 				return 12;
 			}
 		//load reg into reg
-			case 0x4f: {
-				regs.setC(regs.getA());
-				return 4;
-			}
+
 			case 0x7f: {//ld A, A
 				regs.setA(regs.getA());
 				return 4;
@@ -206,6 +214,10 @@ public class Cpu {
 				regs.setA(regs.getL());
 				return 4;
 			}
+			case 0x47: {//ld B, A
+				regs.setB(regs.getA());
+				return 4;
+			}
 			case 0x40: {//ld B, B
 				regs.setB(regs.getB());
 				return 4;
@@ -228,6 +240,10 @@ public class Cpu {
 			}
 			case 0x45: {//ld B, L
 				regs.setB(regs.getL());
+				return 4;
+			}
+			case 0x4f: { //ld C, A
+				regs.setC(regs.getA());
 				return 4;
 			}
 			case 0x48: {//ld C, B
@@ -254,6 +270,10 @@ public class Cpu {
 				regs.setC(regs.getL());
 				return 4;
 			}
+			case 0x57: {//ld D, A
+				regs.setD(regs.getA());
+				return 4;
+			}
 			case 0x50: {//ld D, B
 				regs.setD(regs.getB());
 				return 4;
@@ -276,6 +296,10 @@ public class Cpu {
 			}
 			case 0x55: {//ld D, L
 				regs.setD(regs.getL());
+				return 4;
+			}
+			case 0x5f: {//ld E, A
+				regs.setE(regs.getA());
 				return 4;
 			}
 			case 0x58: {//ld E, B
@@ -302,6 +326,10 @@ public class Cpu {
 				regs.setE(regs.getL());
 				return 4;
 			}
+			case 0x67: {//ld H, A
+				regs.setH(regs.getA());
+				return 4;
+			}
 			case 0x60: {//ld H, B
 				regs.setH(regs.getB());
 				return 4;
@@ -324,6 +352,10 @@ public class Cpu {
 			}
 			case 0x65: {//ld H, L
 				regs.setH(regs.getL());
+				return 4;
+			}
+			case 0x6f: {//ld L, A
+				regs.setL(regs.getA());
 				return 4;
 			}
 			case 0x68: {//ld L, B
@@ -458,6 +490,7 @@ public class Cpu {
 			}
 			case 0xe9: {//jr (HL)
 				jump(regs.getHL(), true);
+				return 4;
 			}
 			case 0x18: {//jr n
 				jump((byte) fetchByte() + regs.getPC(), true);
@@ -469,7 +502,7 @@ public class Cpu {
 			}
 			case 0x28: {//jr z, n
 				jump((byte) fetchByte() + regs.getPC(), regs.getZero()); 
-				return 8;
+				return 8; 
 			}
 			case 0x30: {//jr nc, n
 				jump((byte) fetchByte() + regs.getPC(), !regs.getCarry()); 
@@ -548,7 +581,16 @@ public class Cpu {
 				System.out.println("HL: " + toWord(regs.getHL()));
 				System.out.println("Unrecognized instruction: " + Integer.toHexString(opCode));
 				System.out.println("PC: 0x" + Integer.toHexString((regs.getPC()-1)));
-				System.exit(1);
+				
+				System.out.println("ff40 :" + Integer.toHexString(mmu.read(0xff40)));
+				
+				/*
+				for(int i = 0x9800; i < 0x9bff; i++)
+					System.out.println(Integer.toHexString(mmu.read(i)) + "   " + Integer.toHexString(i));
+				System.out.println(Integer.toHexString(mmu.read(0x8014)) + "   " + Integer.toHexString(0x8014));
+				System.out.println(Integer.toBinaryString(mmu.read(0xff40)));
+				*/
+
 		}
 		
 		return 0;

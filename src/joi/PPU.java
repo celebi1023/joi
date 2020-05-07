@@ -1,11 +1,26 @@
 package joi;
 
 public class PPU {
-	//using the javascript tutorial's convention but shouldn't matter
 	public static final int modeOAM = 2;
 	public static final int modeVRAM = 3;
 	public static final int modeHBLANK = 0;
 	public static final int modeVBLANK = 1;
+	
+	//registers
+	public static final int lcdc = 0xff40; //lcd control
+	public static final int stat = 0xff41; //lcdc status
+	public static final int scrollY = 0xff42;
+	public static final int scrollX = 0xff43; 
+	public static final int ly = 0xff44; //lcdc y-coordinate
+	public static final int lyc = 0xff45; //ly compare
+	public static final int dma = 0xff46; //dma transfer and start address
+	public static final int bgp = 0xff47; //bg & window palette data
+	public static final int obp0 = 0xff48; //object palette 0 data
+	public static final int obp1 = 0xff49; //object palette 1 data 
+	public static final int wy = 0xff4a; //window y position
+	public static final int wx = 0xff4b; //window x position
+	public static final int ie = 0xffff; //interrupt enable 
+	
 	
 	MMU mmu;
 	int mode; //which stage the ppu is in
@@ -51,7 +66,7 @@ public class PPU {
 				break;
 			}
 			case modeVBLANK: {
-				if(mode >= 456) {
+				if(cycles >= 456) {
 					cycles = 0;
 					scanline++;
 					if(scanline > 153) {
@@ -62,6 +77,8 @@ public class PPU {
 				break;
 			}
 		}
+		//update ff44
+		mmu.write(ly, scanline);
 	}
 	
 }
