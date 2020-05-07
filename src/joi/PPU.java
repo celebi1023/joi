@@ -65,10 +65,13 @@ public class PPU {
 						mode = modeVBLANK;
 						//update frame (or maybe wait until vblank to update? idk)
 						/*
-						for(int i = 0; i < windowBuffer.length; i++)
-							System.out.println(Arrays.toString(windowBuffer[i]));
-						System.out.println();
-						*/
+						for(int i = 0; i < windowBuffer.length; i++) {
+							for(int j = 0; j < windowBuffer[i].length; j++) {
+								System.out.print(windowBuffer[i][j]);
+							}
+							System.out.println();
+						}*/
+						
 						//mmu.printBackground();
 						/*
 						for(int i = 0; i < mmu.getTile(1).length; i++){
