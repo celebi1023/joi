@@ -114,7 +114,7 @@ public class Display extends JPanel{
 			frame = new JFrame("NES Test");
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			frame.getContentPane().add(this);
-			frame.setResizable(false);;
+			frame.setResizable(true);;
 			frame.pack();
 			frame.setVisible(true);
 		}
