@@ -1,4 +1,4 @@
-package dsp;
+package joi;
 
 import java.awt.Color;
 import java.awt.Dimension;
