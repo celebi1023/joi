@@ -8,7 +8,7 @@ public class Gameboy {
 
 	public static void main(String[] args) {
 		System.out.println("Hello world");
-		Gameboy gb = new Gameboy("tetris.gb");
+		Gameboy gb = new Gameboy("drmario.gb");
 		gb.start();
 	}
 	
@@ -23,8 +23,6 @@ public class Gameboy {
 		while(true) {
 			int cycleIncrease = cpu.step();
 			ppu.step(cycleIncrease);
-			
-			
 			
 			stopper++;
 			//if(stopper > 100) break;

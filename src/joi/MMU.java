@@ -21,25 +21,36 @@ public class MMU {
     //FFFF - FFFF Interrupts Enable Register (IE)	
 	private byte[] memory;
 	private byte[] boot;
-	private int[][] tileSet;
+	private byte[] cart;
+	private int[][] tileSet0;
+	private int[][] tileSet1;
 	public int[][] tileMap0; //is this bad practice lol idk
 	private int[][] returnTile; //used for getTile()
 	public boolean pause; //strictly for testing@!!!!!!!!!!!!!!!!
 	
 	public MMU(String fileName) {
 		memory = new byte[0x10000];
-		openRom(fileName);
-		tileSet = new int[1000][16]; //for now: starting from 8800, 1000 tiles x 16 bytes
+		tileSet0 = new int[1000][16]; //for now: starting from 8800, 1000 tiles x 16 bytes
+		tileSet1 = new int[1000][16];
 		tileMap0 = new int[32][32]; //for now: starting from 
 		returnTile = new int[8][8];
+		openRom(fileName);
 		pause = false;
 	}
 	
 	public void write(int address, int val) {
+		if(0x0000 <= address && address < 0x8000) {
+			return; //can't write to rom i think?
+		}
 		if(0x8000 <= address && address <= 0x9000) {//tileBank data, using tileSet 1 for now 
 			int index1 = (address - 0x8000)/16;
 			int index2 = (address - 0x8000)% 16;
-			tileSet[index1][index2] = val % 256;
+			tileSet0[index1][index2] = val % 256;
+		}
+		if(0x8800 <= address && address <= 0x9800) {
+			int index1 = (address - 0x8800)/16;
+			int index2 = (address - 0x8800)% 16;
+			tileSet1[index1][index2] = val % 256;
 		}
 		if(0x9800 <= address && address <= 0x9bff) {//tileMap #0 (just using this for now)
 			int index1 = (address - 0x9800)/32;
@@ -55,6 +66,7 @@ public class MMU {
 	
 	public int[][] getTile(int index) {
 		//using returnTile to return
+		int[][]tileSet = (read(0xff40)/16 % 2 == 1) ? tileSet0 : tileSet1;
 		for(int i = 0; i < 8; i++) {
 			String first = Integer.toBinaryString(tileSet[index][2*i]);
 			String second = Integer.toBinaryString(tileSet[index][2*i + 1]);
@@ -73,24 +85,51 @@ public class MMU {
 	
 	private void openRom(String fileName) {
 		try {
-			//to fix later
-			String startup = "BootRomMod.bin";
-			boot = Files.readAllBytes(Paths.get("/Users/justi/joi/roms/" + startup));
-			/*
-			int begin = 0x00; int length = 20;
-			for(int i = begin; i < begin + length; i++) {
-				System.out.print(Integer.toHexString(Byte.toUnsignedInt(boot[i])) + " ");
+			//absolute path to fix later
+			//cartridge
+			
+			cart = Files.readAllBytes(Paths.get("/Users/justi/joi/roms/" + fileName));
+			for(int i = 0; i < 0x8000; i++) {
+				memory[i] = cart[i];
 			}
-			*/
-			/*
+			for(int i = 0; i < cart.length; i++) {
+				write(i, Byte.toUnsignedInt(cart[i]));
+			}
+			System.out.println("Successfully cartridge into memory");
+			
+			
+			//commented out for testing
+			String startup = "DMG_ROM.bin";
+			//startup = "BootRomMod.bin";
+			boot = Files.readAllBytes(Paths.get("/Users/justi/joi/roms/" + startup));
+			
 			for(int i = 0; i < boot.length; i++) {
 				memory[i] = boot[i];
+				System.out.println("index: " + Integer.toHexString(i) + " " + Integer.toHexString(Byte.toUnsignedInt(boot[i])));
 			}
+			
+			System.out.println("test: " + Integer.toHexString(memory[0x101]));
+			System.out.println("Successfully bootrom into memory");
+			
+			
+			
+			/*
+			for(int i = 0; i < boot.length; i++)
+				System.out.println(Integer.toHexString(Byte.toUnsignedInt(boot[i])));
 			*/
-			for(int i = 0; i < boot.length; i++) {
-				write(i, Byte.toUnsignedInt(boot[i]));
+			//System.out.println(Integer.toHexString(read(0x0151)));
+			
+			/*for(int i = 0; i < 256; i++) {
+				int[][] tempTile = getTile(i);
+				System.out.println("Tile: " + i + " flag: " + (read(0xff40)/16 % 2 == 1));
+				for(int j = 0; j < tempTile.length; j++)
+					System.out.println(Arrays.toString(tempTile[j]));
 			}
-			System.out.println("Successfully loaded rom into memory");
+			
+			for(int i = 0x8000; i < 0x8500; i++)
+				System.out.println(Integer.toHexString(i) + " " + Integer.toHexString(read(i)));
+			
+			*/
 			
 		} catch (IOException e) {
 			e.printStackTrace();

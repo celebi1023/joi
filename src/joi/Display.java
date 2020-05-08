@@ -14,8 +14,6 @@ import javax.swing.JPanel;
 
 public class Display extends JPanel{
 	
-	MMU mmu;
-	
 	JFrame frame = null;
 	
 	BufferedImage canvas;

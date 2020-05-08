@@ -75,14 +75,38 @@ public class Cpu {
 		System.out.print("\tzsfc: " + regs.getZSHC());
 		System.out.println("\tdesired reg: " + Integer.toHexString(regs.getC()));
 		*/
-		
+		System.out.println(Integer.toBinaryString(mmu.read(0xff40)));
+		if((mmu.read(0xff40) << 6 % 2) == 1)
+			System.exit(1);
 		//for testing
-		
-		if(regs.getPC() - 1 == 0x00fa) {
-			//mmu.printBackground();
-			//System.out.println("locked up");
-			mmu.pause = true;
-			//System.exit(1);
+		//breakpoint
+		if(regs.getPC() - 1 == 0x343) {
+			System.out.println("pc: " + Integer.toHexString(regs.getPC() - 1));
+			System.out.println(Integer.toHexString(opCode));
+			//System.out.println(Integer.toHexString(fetchWord()));
+			//System.out.println(Integer.toHexString(fetchByte()));
+			//System.out.println(Integer.toHexString(fetchByte()));
+			System.out.println("AF: " + toWord(regs.getAF()));
+			System.out.println("BC: " + toWord(regs.getBC()));
+			System.out.println("DE: " + toWord(regs.getDE()));
+			System.out.println("HL: " + toWord(regs.getHL()));
+			System.out.println("SP: " + toWord(regs.getSP()));
+			String flags = Integer.toBinaryString(regs.getF());
+			while(flags.length() < 8)
+				flags = '0' + flags;
+			System.out.println("flags: " + flags.substring(0, 4));
+			
+			for(int i = 0x00; i < 0x30; i++) {
+				System.out.println("pc: " + Integer.toHexString(i) + " ins: " + Integer.toHexString(mmu.read(i)));
+			}
+			
+			String ff40 = Integer.toBinaryString(mmu.read(0xff40));
+			while(ff40.length() < 8)
+				ff40 = '0' + flags;
+			System.out.println("ff40: " + ff40 + " " + Integer.toHexString(mmu.read(0xff40)));
+			//while(true) {;}
+			System.out.println(Integer.toHexString(mmu.read(0xcffd)));
+			System.exit(0);
 		}
 		
 		switch(opCode) {
@@ -91,32 +115,48 @@ public class Cpu {
 			
 		//dec
 			case 0x3d: {//dec a
-				regs.setA(regs.subByte(regs.getA(), 1));
+				regs.setA(regs.subByte(regs.getA(), 1, true));
 				return 4;
 			}
 			case 0x05: {//dec b
-				regs.setB(regs.subByte(regs.getB(), 1)); 
+				regs.setB(regs.subByte(regs.getB(), 1, true)); 
 				return 4;
 			}
 			case 0x0d: {//dec c
-				regs.setC(regs.subByte(regs.getC(), 1));
+				regs.setC(regs.subByte(regs.getC(), 1, true));
 				return 4;
 			}
 			case 0x15: {//dec d
-				regs.setD(regs.subByte(regs.getD(), 1));
+				regs.setD(regs.subByte(regs.getD(), 1, true));
 				return 4;
 			}
 			case 0x1d: {//dec e
-				regs.setE(regs.subByte(regs.getE(), 1));
+				regs.setE(regs.subByte(regs.getE(), 1, true));
 				return 4;
 			}
 			case 0x25: {//dec h
-				regs.setH(regs.subByte(regs.getH(), 1));
+				regs.setH(regs.subByte(regs.getH(), 1, true));
 				return 4;
 			}
 			case 0x2d: {//dec l
-				regs.setL(regs.subByte(regs.getL(), 1));
+				regs.setL(regs.subByte(regs.getL(), 1, true));
 				return 4;
+			}
+			case 0x0b: {//dec bc
+				regs.setBC((regs.getBC() + 65536 - 1)%65536);
+				return 8;
+			}
+			case 0x1b: {//dec be
+				regs.setDE((regs.getDE() + 65536 - 1)%65536);
+				return 8;
+			}
+			case 0x2b: {//dec hl
+				regs.setHL((regs.getHL() + 65536 - 1)%65536);
+				return 8;
+			}
+			case 0x3b: {//dec sp
+				regs.setSP((regs.getSP() + 65536 - 1)%65536);
+				return 8;
 			}
 			
 		//inc
@@ -169,7 +209,7 @@ public class Cpu {
 				return 8;
 			}
 			
-		//8-bit load 
+		//8-bit load to reg
 			case 0x3e: {
 				regs.setA(fetchByte());
 				return 8;
@@ -199,21 +239,31 @@ public class Cpu {
 				return 8;
 			}
 			
-		//16-bit load
-			case 0x11: {
+		//16-bit load to reg
+			case 0x01: {//ld bc, nn
+				regs.setBC(fetchWord());
+				return 12;
+			}
+			case 0x11: {//ld de, nn
 				regs.setDE(fetchWord());
 				return 12;
 			}
-			
-			case 0x21: {
+			case 0x21: {//ld hl, nn
 				regs.setHL(fetchWord());	
 				return 12;
 			}
-			
-			case 0x31: {
+			case 0x31: {//ld sp, nn
 				regs.setSP(fetchWord());
 				return 12;
 			}
+			
+		//8-bit load to mem
+			case 0x36: {//ld (hl), n
+				mmu.write(regs.getHL(), fetchByte());
+				return 12;
+			}
+
+			
 		//load reg into reg
 
 			case 0x7f: {//ld A, A
@@ -432,12 +482,34 @@ public class Cpu {
 				regs.setHL(regs.getHL() - 1);
 				return 8;
 			}
-			
+			case 0x70: {//ld (hl), b
+				mmu.write(regs.getHL(), regs.getB());
+				return 8;
+			}
+			case 0x71: {//ld (hl), c
+				mmu.write(regs.getHL(), regs.getC());
+				return 8;
+			}
+			case 0x72: {//ld (hl), d
+				mmu.write(regs.getHL(), regs.getD());
+				return 8;
+			}
+			case 0x73: {//ld (hl), e
+				mmu.write(regs.getHL(), regs.getE());
+				return 8;
+			}
+			case 0x74: {//ld (hl), h
+				mmu.write(regs.getHL(), regs.getH());
+				return 8;
+			}
+			case 0x75: {//ld (hl), l
+				mmu.write(regs.getHL(), regs.getL());
+				return 8;
+			}
 			case 0x77: {//ld(hl), a
 				mmu.write(regs.getHL(), regs.getA());
 				return 8;
 			}
-			
 			case 0xe2: {
 				mmu.write(0xFF00 + regs.getC(), regs.getA());
 				return 8;
@@ -453,93 +525,169 @@ public class Cpu {
 			}
 			
 		//load mem to reg
-			case 0x1a: {
+			case 0x0a: {//ld a, (bc)
+				regs.setA(mmu.read(regs.getBC()));
+				return 8;
+			}
+			case 0x1a: {//ld a, (de)
 				regs.setA(mmu.read(regs.getDE()));
+				return 8;
+			}
+			case 0xfa: {//ld a, (nn)
+				regs.setA(mmu.read(fetchWord()));
+				return 16;
+			}
+			case 0x2a: {//ldi a, (hl)
+				regs.setA(mmu.read(regs.getHL()));
+				regs.setHL(regs.getHL() + 1);
 				return 8;
 			}
 			case 0x7e: {//ld A, (HL)
 				regs.setA(mmu.read(regs.getHL()));
 				return 8;
 			}
+			case 0x46: {//ld B, (hl)
+				regs.setB(mmu.read(regs.getHL()));
+				return 8;
+			}
+			case 0x4e: {//ld C, (hl)
+				regs.setC(mmu.read(regs.getHL()));
+				return 8;
+			}
+			case 0x56: {//ld D, (hl)
+				regs.setD(mmu.read(regs.getHL()));
+				return 8;
+			}
+			case 0x5e: {//ld E, (hl)
+				regs.setE(mmu.read(regs.getHL()));
+				return 8;
+			}
+			case 0x66: {//ld H, (hl)
+				regs.setH(mmu.read(regs.getHL()));
+				return 8;
+			}
+			case 0x6e: {//ld L, (hl)
+				regs.setL(mmu.read(regs.getHL()));
+				return 8;
+			}
 			case 0xF0: {
 				regs.setA(mmu.read(0xFF00 + fetchByte()));
 				return 12;
 			}
+			
+		//ADC
+			case 0x8f: {//adc a
+				regs.setA(regs.addByte(regs.getA(), regs.getA() + regs.getCarryInt()));
+				return 4;
+			}
+			case 0x88: {//adc b
+				regs.setA(regs.addByte(regs.getA(), regs.getB() + regs.getCarryInt()));
+				return 4;
+			}
+			case 0x89: {//adc c
+				regs.setA(regs.addByte(regs.getA(), regs.getC() + regs.getCarryInt()));
+				return 4;
+			}
+			case 0x8a: {//adc d
+				regs.setA(regs.addByte(regs.getA(), regs.getD() + regs.getCarryInt()));
+				return 4;
+			}
+			case 0x8b: {//adc e
+				regs.setA(regs.addByte(regs.getA(), regs.getE() + regs.getCarryInt()));
+				return 4;
+			}
+			case 0x8c: {//adc h
+				regs.setA(regs.addByte(regs.getA(), regs.getH() + regs.getCarryInt()));
+				return 4;
+			}
+			case 0x8d: {//adc l
+				regs.setA(regs.addByte(regs.getA(), regs.getL() + regs.getCarryInt()));
+				return 4;
+			}
+			case 0x8e: {//adc (hl)
+				regs.setA(regs.addByte(regs.getA(), mmu.read(regs.getHL()) + regs.getCarryInt()));
+				return 8;
+			}
+			case 0xce: {//adc a
+				regs.setA(regs.addByte(regs.getA(), fetchByte() + regs.getCarryInt()));
+				return 8;
+			}
+			
 		//compare
 			case 0xbf: { //cp A, A
-				regs.subByte(regs.getA(), regs.getA());
+				regs.subByte(regs.getA(), regs.getA(), false);
 				return 4;
 			}
 			case 0xb8: { //cp A, B
-				regs.subByte(regs.getA(), regs.getB());
+				regs.subByte(regs.getA(), regs.getB(), false);
 				return 4;
 			}
 			case 0xb9: { //cp A, C
-				regs.subByte(regs.getA(), regs.getC());
+				regs.subByte(regs.getA(), regs.getC(), false);
 				return 4;
 			}
 			case 0xba: { //cp A, D
-				regs.subByte(regs.getA(), regs.getD());
+				regs.subByte(regs.getA(), regs.getD(), false);
 				return 4;
 			}
 			case 0xbb: { //cp A, E
-				regs.subByte(regs.getA(), regs.getE());
+				regs.subByte(regs.getA(), regs.getE(), false);
 				return 4;
 			}
 			case 0xbc: { //cp A, H
-				regs.subByte(regs.getA(), regs.getH());
+				regs.subByte(regs.getA(), regs.getH(), false);
 				return 4;
 			}
 			case 0xbd: { //cp A, L
-				regs.subByte(regs.getA(), regs.getL());
+				regs.subByte(regs.getA(), regs.getL(), false);
 				return 4;
 			}
 			case 0xbe: { //cp A, (hl)
-				regs.subByte(regs.getA(), mmu.read(regs.getHL()));
+				regs.subByte(regs.getA(), mmu.read(regs.getHL()), false);
 				return 8;
 			}
 			case 0xfe: { //cp A, #
-				regs.subByte(regs.getA(), fetchByte());
+				regs.subByte(regs.getA(), fetchByte(), false);
 				return 8;
 			}
 		//sub
 			case 0x97: { //sub a
-				regs.setA(regs.subByte(regs.getA(), regs.getA()));
+				regs.setA(regs.subByte(regs.getA(), regs.getA(), false));
 				return 4;
 			}
 			case 0x90: { //sub b
-				regs.setA(regs.subByte(regs.getA(), regs.getB()));
+				regs.setA(regs.subByte(regs.getA(), regs.getB(), false));
 				return 4;
 			}
 			case 0x91: { //sub c
-				regs.setA(regs.subByte(regs.getA(), regs.getC()));
+				regs.setA(regs.subByte(regs.getA(), regs.getC(), false));
 				return 4;
 			}
 			case 0x92: { //sub d
-				regs.setA(regs.subByte(regs.getA(), regs.getD()));
+				regs.setA(regs.subByte(regs.getA(), regs.getD(), false));
 				return 4;
 			}
 			case 0x93: { //sub e
-				regs.setA(regs.subByte(regs.getA(), regs.getE()));
+				regs.setA(regs.subByte(regs.getA(), regs.getE(), false));
 				return 4;
 			}
 			case 0x94: { //sub h
-				regs.setA(regs.subByte(regs.getA(), regs.getH()));
+				regs.setA(regs.subByte(regs.getA(), regs.getH(), false));
 				return 4;
 			}
 			case 0x95: { //sub l
-				regs.setA(regs.subByte(regs.getA(), regs.getL()));
+				regs.setA(regs.subByte(regs.getA(), regs.getL(), false));
 				return 4;
 			}
 			case 0x96: { //sub (hl)
-				regs.setA(regs.subByte(regs.getA(), mmu.read(regs.getHL())));
+				regs.setA(regs.subByte(regs.getA(), mmu.read(regs.getHL()), false));
 				return 8;
 			}
 			case 0xd6: { //sub #
-				regs.setA(regs.subByte(regs.getA(), fetchByte()));
+				regs.setA(regs.subByte(regs.getA(), fetchByte(), false));
 				return 8;
 			}
-		//add
+		//add byte
 			case 0x87: { //add a
 				regs.setA(regs.addByte(regs.getA(), regs.getA()));
 				return 4;
@@ -576,14 +724,142 @@ public class Cpu {
 				regs.setA(regs.addByte(regs.getA(), fetchByte()));
 				return 8;
 			}
-		//xor
-			case 0xaf: {
-				regs.setA(regs.setFlags(regs.getA() ^ regs.getA()));
+		//add word
+			case 0x09: {//add hl, bc
+				regs.setHL(regs.addWord(regs.getHL(), regs.getBC()));
+				return 8;
+			}
+			case 0x19: {//add hl, de
+				regs.setHL(regs.addWord(regs.getHL(), regs.getDE()));
+				return 8;
+			}
+			case 0x29: {//add hl, hl
+				regs.setHL(regs.addWord(regs.getHL(), regs.getHL()));
+				return 8;
+			}
+			case 0x39: {//add hl, sp
+				regs.setHL(regs.addWord(regs.getHL(), regs.getSP()));
+				return 8;
+			}
+		//or
+			case 0xb7: {//or A
+				regs.setA(regs.or(regs.getA(), regs.getA()));
 				return 4;
+			}
+			case 0xb0: {//or B
+				regs.setA(regs.or(regs.getA(), regs.getB()));
+				return 4;
+			}
+			case 0xb1: {//or C
+				regs.setA(regs.or(regs.getA(), regs.getC()));
+				return 4;
+			}
+			case 0xb2: {//or D
+				regs.setA(regs.or(regs.getA(), regs.getD()));
+				return 4;
+			}
+			case 0xb3: {//or E
+				regs.setA(regs.or(regs.getA(), regs.getE()));
+				return 4;
+			}
+			case 0xb4: {//or H
+				regs.setA(regs.or(regs.getA(), regs.getH()));
+				return 4;
+			}
+			case 0xb5: {//or L
+				regs.setA(regs.or(regs.getA(), regs.getL()));
+				return 4;
+			}
+			case 0xb6: {//or (hl)
+				regs.setA(regs.or(regs.getA(), mmu.read(regs.getHL())));
+				return 8;
+			}
+			case 0xf6: {//or #
+				regs.setA(regs.or(regs.getA(), fetchByte()));
+				return 8;
+			}
+		//xor
+			case 0xaf: {//xor a
+				regs.setA(regs.xor(regs.getA(), regs.getA()));
+				return 4;
+			}
+			case 0xa8: {//xor b
+				regs.setA(regs.xor(regs.getA(), regs.getB()));
+				return 4;
+			}
+			case 0xa9: {//xor c
+				regs.setA(regs.xor(regs.getA(), regs.getC()));
+				return 4;
+			}
+			case 0xaa: {//xor d
+				regs.setA(regs.xor(regs.getA(), regs.getD()));
+				return 4;
+			}
+			case 0xab: {//xor e
+				regs.setA(regs.xor(regs.getA(), regs.getE()));
+				return 4;
+			}
+			case 0xac: {//xor h
+				regs.setA(regs.xor(regs.getA(), regs.getH()));
+				return 4;
+			}
+			case 0xad: {//xor l
+				regs.setA(regs.xor(regs.getA(), regs.getL()));
+				return 4;
+			}
+			case 0xae: {//xor (HL)
+				regs.setA(regs.xor(regs.getA(), mmu.read(regs.getHL())));
+				return 8;
+			}
+			case 0xee: {//xor #
+				regs.setA(regs.xor(regs.getA(), fetchByte()));
+				return 8;
+			}
+		//and 
+			case 0xa7: {//and a
+				regs.setA(regs.and(regs.getA(), regs.getA()));
+				return 4;
+			}
+			case 0xa0: {//and b
+				regs.setA(regs.and(regs.getA(), regs.getB()));
+				return 4;
+			}
+			case 0xa1: {//and c
+				regs.setA(regs.and(regs.getA(), regs.getC()));
+				return 4;
+			}
+			case 0xa2: {//and d
+				regs.setA(regs.and(regs.getA(), regs.getD()));
+				return 4;
+			}
+			case 0xa3: {//and e
+				regs.setA(regs.and(regs.getA(), regs.getE()));
+				return 4;
+			}
+			case 0xa4: {//and h
+				regs.setA(regs.and(regs.getA(), regs.getH()));
+				return 4;
+			}
+			case 0xa5: {//and l
+				regs.setA(regs.and(regs.getA(), regs.getL()));
+				return 4;
+			}
+			case 0xa6: {//and hl
+				regs.setA(regs.and(regs.getA(), mmu.read(regs.getHL())));
+				return 8;
+			}
+			case 0xe6: {//and #
+				regs.setA(regs.and(regs.getA(), fetchByte()));
+				return 8;
 			}
 		//rotate
 			case 0x17: {
 				regs.setA(regs.rotateByteLeftCarry(regs.getA()));
+				return 4;
+			}
+		//compliment
+			case 0x2f: {//cpl
+				regs.setA(regs.complByte(regs.getA()));
 				return 4;
 			}
 			
@@ -617,16 +893,98 @@ public class Cpu {
 				return 8;
 			}
 			
+			case 0xc2: {//jp nz, nn
+				jump(fetchWord(), !regs.getZero());
+				return 12;
+			}
+			case 0xca: {//jp z, nn
+				jump(fetchWord(), regs.getZero());
+				return 12;
+			}
+			case 0xd2: {//jp nc, nn
+				jump(fetchWord(), !regs.getCarry());
+				return 12;
+			}
+			case 0xda: {//jp c, nn
+				jump(fetchWord(), regs.getCarry());
+				return 12;
+			}
+			
+		//jst
+			case 0xc7:{
+				pushWord(regs.getPC());
+				jump(0x00, true);
+				return 32;
+			}
+			case 0xcf:{
+				pushWord(regs.getPC());
+				jump(0x08, true);
+				return 32;
+			}
+			case 0xd7:{
+				pushWord(regs.getPC());
+				jump(0x10, true);
+				return 32;
+			}
+			case 0xdf:{
+				pushWord(regs.getPC());
+				jump(0x18, true);
+				return 32;
+			}
+			case 0xe7:{
+				pushWord(regs.getPC());
+				jump(0x20, true);
+				return 32;
+			}
+			case 0xef:{
+				pushWord(regs.getPC());
+				jump(0x28, true);
+				return 32;
+			}
+			case 0xf7:{
+				pushWord(regs.getPC());
+				jump(0x30, true);
+				return 32;
+			}
+			case 0xff:{
+				pushWord(regs.getPC());
+				jump(0x38, true);
+				return 32;
+			}
+			
 		//push
+			case 0xf5: { //push af
+				pushWord(regs.getAF());
+				return 16;
+			}
 			case 0xc5: {//push bc
-				//System.out.println("preBC: " + Integer.toHexString(regs.getBC()));
 				pushWord(regs.getBC());
 				return 16;
 			}
+			case 0xd5: {//push de
+				pushWord(regs.getDE());
+				return 16;
+			}
+			case 0xe5: {//push hl
+				pushWord(regs.getHL());
+				return 16;
+			}
+			
 		//pop
+			case 0xf1: {//pop af
+				regs.setAF(popWord());
+				return 12;
+			}
 			case 0xc1: {//pop bc
 				regs.setBC(popWord());
-				//System.out.println("afterBC: " + Integer.toHexString(regs.getBC()));
+				return 12;
+			}
+			case 0xd1: {//pop de
+				regs.setDE(popWord());
+				return 12;
+			}
+			case 0xe1: {//pop hl
+				regs.setHL(popWord());
 				return 12;
 			}
 		//call
@@ -635,8 +993,25 @@ public class Cpu {
 				return 12;
 			}
 		//return
-			case 0xc9: {
+			case 0xc9: { //ret
 				ret(true);
+				return 8;
+			}
+			case 0xc0: { //ret nz
+				ret(!regs.getZero());
+				//System.out.println("pc: " + regs.getPC());
+				return 8;
+			}
+			case 0xc8: { //ret z
+				ret(regs.getZero());
+				return 8;
+			}
+			case 0xd0: { //ret nc
+				ret(!regs.getCarry());
+				return 8;
+			}
+			case 0xd8: { //ret c
+				ret(regs.getCarry());
 				return 8;
 			}
 			
@@ -657,6 +1032,44 @@ public class Cpu {
 						regs.checkByteBit(regs.getH(), 7);
 						return 8;
 					}
+				//swap
+					case 0x37:{ //swap a
+						regs.setA(regs.swapByte(regs.getA()));
+						return 8;
+					}
+					case 0x30:{ //swap b
+						regs.setB(regs.swapByte(regs.getB()));
+						return 8;
+					}
+					case 0x31:{ //swap c
+						regs.setC(regs.swapByte(regs.getC()));
+						return 8;
+					}
+					case 0x32:{ //swap d
+						regs.setD(regs.swapByte(regs.getD()));
+						return 8;
+					}
+					case 0x33:{ //swap e
+						regs.setE(regs.swapByte(regs.getE()));
+						return 8;
+					}
+					case 0x34:{ //swap h
+						regs.setH(regs.swapByte(regs.getH()));
+						return 8;
+					}
+					case 0x35:{ //swap l
+						regs.setL(regs.swapByte(regs.getL()));
+						return 8;
+					}
+					case 0x36:{ //swap (hl)
+						mmu.write(regs.getHL(), regs.swapByte(mmu.read(regs.getHL())));
+						return 16;
+					}
+				//reset
+					case 0x87:{ //res A
+						regs.setA(regs.reset(regs.getA(), 0));
+						return 8;
+					}
 					default:{
 						//System.out.println(toWord(regs.getSP()));
 						System.out.println("AF: " + toWord(regs.getAF()));
@@ -669,9 +1082,13 @@ public class Cpu {
 					}
 				}
 			}
-			
+		//Enable interrupt
+			case 0xfb: {
+				//TODO
+				return 4;
+			}
 		//Disable interrupt 
-			case 0xF3: {
+			case 0xf3: {
 				//TODO
 				return 4;
 			}
