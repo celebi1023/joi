@@ -69,18 +69,18 @@ public class Cpu {
 	//returns number of cycles running the instruction took
 	public int step() {
 		int opCode = fetchByte();
-		/*
+		
 		System.out.print("Current ins: " + Integer.toHexString(opCode));
 		System.out.print("\t   Current PC: " + Integer.toHexString(regs.getPC() - 1));
 		System.out.print("\tzsfc: " + regs.getZSHC());
 		System.out.println("\tdesired reg: " + Integer.toHexString(regs.getC()));
-		*/
-		System.out.println(Integer.toBinaryString(mmu.read(0xff40)));
-		if((mmu.read(0xff40) << 6 % 2) == 1)
-			System.exit(1);
+		
+		//System.out.println(Integer.toBinaryString(mmu.read(0xff40)));
+		//if((mmu.read(0xff40) << 5 % 2) == 1)
+			//System.exit(1);
 		//for testing
 		//breakpoint
-		if(regs.getPC() - 1 == 0x343) {
+		if(regs.getPC() - 1 == 0x35bbb && mmu.read(0xff50) == 1) {
 			System.out.println("pc: " + Integer.toHexString(regs.getPC() - 1));
 			System.out.println(Integer.toHexString(opCode));
 			//System.out.println(Integer.toHexString(fetchWord()));
@@ -95,17 +95,32 @@ public class Cpu {
 			while(flags.length() < 8)
 				flags = '0' + flags;
 			System.out.println("flags: " + flags.substring(0, 4));
-			
+			/*
 			for(int i = 0x00; i < 0x30; i++) {
 				System.out.println("pc: " + Integer.toHexString(i) + " ins: " + Integer.toHexString(mmu.read(i)));
 			}
-			
+			*/
 			String ff40 = Integer.toBinaryString(mmu.read(0xff40));
 			while(ff40.length() < 8)
 				ff40 = '0' + flags;
 			System.out.println("ff40: " + ff40 + " " + Integer.toHexString(mmu.read(0xff40)));
 			//while(true) {;}
 			System.out.println(Integer.toHexString(mmu.read(0xcffd)));
+			
+			for(int i = 0x8800; i < 0x9000; i++)
+				System.out.println("address: " + Integer.toHexString(i) + " " + Integer.toHexString(mmu.read(i)));
+			
+			for(int i = 0; i < 100; i++) {
+				int[][] x = mmu.getTile(i);
+				System.out.println("tile i: " + i);
+				for(int j = 0; j < x.length; j++) {
+					for(int k = 0; k < x.length; k++)
+						System.out.print(x[j][k]);
+					System.out.println();
+				}
+				System.out.println();
+			}
+			
 			System.exit(0);
 		}
 		
@@ -146,7 +161,7 @@ public class Cpu {
 				regs.setBC((regs.getBC() + 65536 - 1)%65536);
 				return 8;
 			}
-			case 0x1b: {//dec be
+			case 0x1b: {//dec de
 				regs.setDE((regs.getDE() + 65536 - 1)%65536);
 				return 8;
 			}
@@ -157,6 +172,9 @@ public class Cpu {
 			case 0x3b: {//dec sp
 				regs.setSP((regs.getSP() + 65536 - 1)%65536);
 				return 8;
+			}
+			case 0x35: {//dec (hl)
+				mmu.write(regs.getHL(), regs.subByte(mmu.read(regs.getHL()), 1, true));
 			}
 			
 		//inc
@@ -1092,6 +1110,11 @@ public class Cpu {
 				//TODO
 				return 4;
 			}
+		//halt
+			case 0x76: {
+				//TODO
+				return 4;
+			}
 			
 			default:
 				//System.out.println("carry : " + regs.getCarry() + " " + Integer.toBinaryString(regs.rotateByteRightCarry(0b10110111)) + " carry : " + regs.getCarry());
@@ -1127,3 +1150,5 @@ public class Cpu {
 	}
 	
 }
+
+

@@ -42,14 +42,19 @@ public class MMU {
 		if(0x0000 <= address && address < 0x8000) {
 			return; //can't write to rom i think?
 		}
-		if(0x8000 <= address && address <= 0x9000) {//tileBank data, using tileSet 1 for now 
+		if(0x8000 <= address && address < 0x9000) { 
 			int index1 = (address - 0x8000)/16;
 			int index2 = (address - 0x8000)% 16;
 			tileSet0[index1][index2] = val % 256;
 		}
-		if(0x8800 <= address && address <= 0x9800) {
-			int index1 = (address - 0x8800)/16;
+		if(0x8800 <= address && address < 0x9000) {
+			int index1 = (address - 0x8800)/16 + 128;
 			int index2 = (address - 0x8800)% 16;
+			tileSet1[index1][index2] = val % 256;
+		}
+		if(0x9000 <= address && address < 0x9800) {
+			int index1 = (address - 0x9000)/16;
+			int index2 = (address - 0x9000)% 16;
 			tileSet1[index1][index2] = val % 256;
 		}
 		if(0x9800 <= address && address <= 0x9bff) {//tileMap #0 (just using this for now)
@@ -61,12 +66,15 @@ public class MMU {
 	}
 	
 	public int read(int address) {
+		if(Byte.toUnsignedInt(memory[0xff50]) != 1 && address < 0x0100)
+			return Byte.toUnsignedInt(boot[address]);
 		return Byte.toUnsignedInt(memory[address]);
 	}
 	
 	public int[][] getTile(int index) {
 		//using returnTile to return
-		int[][]tileSet = (read(0xff40)/16 % 2 == 1) ? tileSet0 : tileSet1;
+		int[][]tileSet = (read(0xff40)/16% 2 == 1) ? tileSet0 : tileSet1;
+		//System.out.println(Integer.toBinaryString(read(0xff40)));
 		for(int i = 0; i < 8; i++) {
 			String first = Integer.toBinaryString(tileSet[index][2*i]);
 			String second = Integer.toBinaryString(tileSet[index][2*i + 1]);
@@ -88,7 +96,7 @@ public class MMU {
 			//absolute path to fix later
 			//cartridge
 			
-			cart = Files.readAllBytes(Paths.get("/Users/justi/joi/roms/" + fileName));
+			cart = Files.readAllBytes(Paths.get("./roms/" + fileName));
 			for(int i = 0; i < 0x8000; i++) {
 				memory[i] = cart[i];
 			}
@@ -101,12 +109,14 @@ public class MMU {
 			//commented out for testing
 			String startup = "DMG_ROM.bin";
 			//startup = "BootRomMod.bin";
-			boot = Files.readAllBytes(Paths.get("/Users/justi/joi/roms/" + startup));
+			boot = Files.readAllBytes(Paths.get("./roms/" + startup));
 			
+			/*
 			for(int i = 0; i < boot.length; i++) {
 				memory[i] = boot[i];
 				System.out.println("index: " + Integer.toHexString(i) + " " + Integer.toHexString(Byte.toUnsignedInt(boot[i])));
 			}
+			*/
 			
 			System.out.println("test: " + Integer.toHexString(memory[0x101]));
 			System.out.println("Successfully bootrom into memory");
