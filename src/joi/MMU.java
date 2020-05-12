@@ -94,10 +94,10 @@ public class MMU {
 		
 		return Byte.toUnsignedInt(memory[address]);
 	}
-	/*//relic of past inefficiency, will keep as reference haha
+
 	public int[][] getTile(int index) {
 		//using returnTile to return
-		int[][]tileSet = (read(0xff40)/16% 2 == 1) ? tileSet0 : tileSet1;
+		int[][]tileSet = tileSet0; //i think having sprites using tileSet0 directly should be ok
 		//System.out.println(Integer.toBinaryString(read(0xff40)));
 		for(int i = 0; i < 8; i++) {
 			String first = Integer.toBinaryString(tileSet[index][2*i]);
@@ -114,7 +114,7 @@ public class MMU {
 		}
 		return returnTile;
 	}
-	*/
+	
 	public int[] getTileLine(int index, int line) {
 		int[][]tileSet = (read(0xff40)/16% 2 == 1) ? tileSet0 : tileSet1;
 		String first = Integer.toBinaryString(tileSet[index][2*line]);

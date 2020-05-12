@@ -1,5 +1,6 @@
 package joi;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class PPU {
@@ -77,8 +78,9 @@ public class PPU {
 							mmu.write(0xff0f, (mmu.read(0xff0f) | 0b00000001));
 						}
 						mode = modeVBLANK;
-
+						
 						//UPDATE SCREEN -------------------------------
+						updateSprites();
 						//window buffer is ready
 						monitor.render(windowBuffer, true);
 						monitor.showAsFrame();
@@ -109,20 +111,7 @@ public class PPU {
 	}
 	
 	private void renderLine() {
-		/*
-		int x = mmu.read(scrollX);
-		int y = mmu.read(scrollY) + scanline;
-		int[][] currentTile = mmu.getTile(mmu.tileMap0[y/8][x/8]);
-		for(int i = 0; i < 160; i++) {
-			if((x + i) % 8 == 0) {
-				currentTile = mmu.getTile(mmu.tileMap0[y/8][(x + i)/8]);
-			}
-			int pixel = currentTile[y % 8][(x + i) % 8];
-			
-			int palette = mmu.read(0xff47);
-			windowBuffer[scanline][i] = ((palette >> (2 * pixel + 1)) % 2) * 2 + ((palette >> (2 * pixel)) % 2);
-		}
-		*/
+		//render background
 		int x = mmu.read(scrollX);
 		int y = mmu.read(scrollY) + scanline;
 		int[] currentTileLine = mmu.getTileLine(mmu.tileMap0[y/8][x/8], y % 8);
@@ -135,7 +124,72 @@ public class PPU {
 			int palette = mmu.read(0xff47);
 			windowBuffer[scanline][i] = ((palette >> (2 * pixel + 1)) % 2) * 2 + ((palette >> (2 * pixel)) % 2);
 		}
-		
+	}
+	
+	private void updateSprites() {
+		//first make a pass of priority 1
+		//not worrying about other priority for now TODO
+		for(int i = 0; i < 40; i++) {
+			int y = mmu.read(0xfe00 + 4*i);
+			int x = mmu.read(0xfe00 + 4*i + 1);
+			if(y != 0 && x != 0) {
+				y = y - 16;
+				x = x - 8;
+				int id = mmu.read(0xfe00 + 4*i + 2);
+				int flags = mmu.read(0xfe00 + 4*i + 3);
+				if(((flags >> 7) & 1) == 1) {
+					boolean flipY = ((flags >> 6) & 1) == 1;
+					boolean flipX = ((flags >> 5) & 1) == 1;
+					int startY = flipY ? 8 : 0;
+					int incY = flipY ? -1 : 1;
+					int startX = flipX ? 8 : 0;
+					int incX = flipX ? -1 : 1;
+					boolean paletteFlag = ((flags >> 4) & 1) == 1;
+					int palette = paletteFlag ? mmu.read(0xff49) : mmu.read(0xff48);
+					int[][]currentTile = mmu.getTile(id);
+					for(int iterY = startY; (iterY < 8 && iterY >= 0); iterY += incY) {
+						for(int iterX = startX; (iterX < 8 && iterX >= 0); iterX += incX) {
+							if(windowBuffer[y + iterY][x + iterX] == 0) {
+								int pixel = currentTile[iterY][iterX];
+								int color = ((palette >> (2 * pixel + 1)) % 2) * 2 + ((palette >> (2 * pixel)) % 2);
+								if(pixel != 0)
+									windowBuffer[y + iterY][x + iterX] = color;
+							}
+						}
+					}
+				}
+			}
+		}
+		//next make a pass of priority 0
+		for(int i = 0; i < 40; i++) {
+			int y = mmu.read(0xfe00 + 4*i);
+			int x = mmu.read(0xfe00 + 4*i + 1);
+			if(y != 0 && x != 0) {
+				y = y - 16;
+				x = x - 8;
+				int id = mmu.read(0xfe00 + 4*i + 2);
+				int flags = mmu.read(0xfe00 + 4*i + 3);
+				if(((flags >> 7) & 1) == 0) {
+					boolean flipY = ((flags >> 6) & 1) == 1;
+					boolean flipX = ((flags >> 5) & 1) == 1;
+					int startY = flipY ? 8 : 0;
+					int incY = flipY ? -1 : 1;
+					int startX = flipX ? 8 : 0;
+					int incX = flipX ? -1 : 1;
+					boolean paletteFlag = ((flags >> 4) & 1) == 1;
+					int palette = paletteFlag ? mmu.read(0xff49) : mmu.read(0xff48);
+					int[][]currentTile = mmu.getTile(id);
+					for(int iterY = startY; (iterY < 8 && iterY >= 0); iterY += incY) {
+						for(int iterX = startX; (iterX < 8 && iterX >= 0); iterX += incX) {
+								int pixel = currentTile[iterY][iterX];
+								int color = ((palette >> (2 * pixel + 1)) % 2) * 2 + ((palette >> (2 * pixel)) % 2);
+								if(pixel != 0)
+									windowBuffer[y + iterY][x + iterX] = color;
+						}
+					}
+				}
+			}
+		}
 	}
 	
 }
