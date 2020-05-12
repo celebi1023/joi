@@ -25,7 +25,7 @@ public class Display extends JPanel{
 	
 	Color[] colors = new Color[4];{
 		colors[0]=Color.WHITE;
-		colors[1]=Color.BLACK;
+		colors[1]=Color.LIGHT_GRAY;
 		colors[2]=Color.DARK_GRAY;
 		colors[3]=Color.BLACK;
 	}
@@ -82,8 +82,7 @@ public class Display extends JPanel{
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
         g2.drawImage(canvas, null, null);
-    }
-
+    }	
 
     public void fillCanvas(Color c) {
         int color = c.getRGB();
@@ -94,22 +93,10 @@ public class Display extends JPanel{
         }
         repaint();
     }
-
-/*    public void drawRect(Color c, int x1, int y1, int width, int height) {
-        int color = c.getRGB();
-        // Implement rectangle drawing
-        for (int x = x1; x < x1 + width; x++) {
-            for (int y = y1; y < y1 + height; y++) {
-                canvas.setRGB(x, y, color);
-            }
-        }
-        repaint();
-    }*/
-    
-    
+   
     public void showAsFrame(){
 		if(frame == null){
-			frame = new JFrame("NES Test");
+			frame = new JFrame("GB Emulator Test");
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			frame.getContentPane().add(this);
 			frame.setResizable(true);;

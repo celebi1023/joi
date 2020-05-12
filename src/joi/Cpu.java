@@ -1,15 +1,19 @@
 package joi;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Arrays;
 
 public class Cpu {
 	private Regs regs;
 	private MMU mmu;
 	short writeAdddress;
+	int counter;
 	
-	public Cpu(MMU m) {
-		regs = new Regs();
+	public Cpu(MMU m, Regs r) {
+		regs = r;
 		mmu = m;
+		counter = -1;
 	}
 	
 	public int fetchByte() {
@@ -38,6 +42,7 @@ public class Cpu {
 	public void pushWord(int val) {
 		pushByte(val/256);
 		pushByte(val%256);
+
 	}
 	
 	public int popByte() {
@@ -65,27 +70,60 @@ public class Cpu {
 		}
 	}
 	
-	
 	//returns number of cycles running the instruction took
 	public int step() {
 		int opCode = fetchByte();
-		
+		/*
+		if(mmu.pause) {
+			System.out.println(Integer.toHexString(regs.getPC()));
+			System.exit(1);
+		}
+		*/
+		/*
 		System.out.print("Current ins: " + Integer.toHexString(opCode));
 		System.out.print("\t   Current PC: " + Integer.toHexString(regs.getPC() - 1));
 		System.out.print("\tzsfc: " + regs.getZSHC());
 		System.out.println("\tdesired reg: " + Integer.toHexString(regs.getC()));
+		*/
 		
-		//System.out.println(Integer.toBinaryString(mmu.read(0xff40)));
-		//if((mmu.read(0xff40) << 5 % 2) == 1)
-			//System.exit(1);
+		if(regs.getPC() - 1 == 0xaaaaaa) {
+			counter = 20;
+			System.out.println("\tset");
+		}
+		
+		if(counter != -1)
+			counter --;
+		
+		if(counter == 0)
+			System.exit(1);
+		
+		/*
+		if(regs.getPC() - 1 == 0x40) {
+			//System.out.print(Integer.toHexString(mmu.read(regs.getSP() + 1)));
+			//System.out.println(Integer.toHexString(mmu.read(regs.getSP())));
+			//System.out.println(Integer.toHexString(mmu.read(regs.getSP() + 1) * 256 + mmu.read(regs.getSP())));
+			if(mmu.read(regs.getSP() + 1) * 256 +  mmu.read(regs.getSP()) == 0xd98) {
+				//System.out.println("SP: " + Integer.toHexString(regs.getSP()));
+				try {
+					fr.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				System.exit(1);
+			}
+		}
+		*/
+		
+		
+		
 		//for testing
-		//breakpoint
-		if(regs.getPC() - 1 == 0x35bbb && mmu.read(0xff50) == 1) {
+		//breakpoint	regs.getDE() == 0x5d83
+		
+		if(regs.getPC() - 1 == 0x40bbbbb  && mmu.read(0xff50) == 1) {
+			
 			System.out.println("pc: " + Integer.toHexString(regs.getPC() - 1));
 			System.out.println(Integer.toHexString(opCode));
-			//System.out.println(Integer.toHexString(fetchWord()));
-			//System.out.println(Integer.toHexString(fetchByte()));
-			//System.out.println(Integer.toHexString(fetchByte()));
 			System.out.println("AF: " + toWord(regs.getAF()));
 			System.out.println("BC: " + toWord(regs.getBC()));
 			System.out.println("DE: " + toWord(regs.getDE()));
@@ -95,39 +133,17 @@ public class Cpu {
 			while(flags.length() < 8)
 				flags = '0' + flags;
 			System.out.println("flags: " + flags.substring(0, 4));
-			/*
-			for(int i = 0x00; i < 0x30; i++) {
-				System.out.println("pc: " + Integer.toHexString(i) + " ins: " + Integer.toHexString(mmu.read(i)));
-			}
-			*/
+
 			String ff40 = Integer.toBinaryString(mmu.read(0xff40));
 			while(ff40.length() < 8)
 				ff40 = '0' + flags;
 			System.out.println("ff40: " + ff40 + " " + Integer.toHexString(mmu.read(0xff40)));
-			//while(true) {;}
-			System.out.println(Integer.toHexString(mmu.read(0xcffd)));
-			
-			for(int i = 0x8800; i < 0x9000; i++)
-				System.out.println("address: " + Integer.toHexString(i) + " " + Integer.toHexString(mmu.read(i)));
-			
-			for(int i = 0; i < 100; i++) {
-				int[][] x = mmu.getTile(i);
-				System.out.println("tile i: " + i);
-				for(int j = 0; j < x.length; j++) {
-					for(int k = 0; k < x.length; k++)
-						System.out.print(x[j][k]);
-					System.out.println();
-				}
-				System.out.println();
-			}
-			
+			System.out.println(Integer.toHexString(mmu.read(0xfe00)));
 			System.exit(0);
 		}
-		
 		switch(opCode) {
 		//nop
 			case 0x00: return 4;
-			
 		//dec
 			case 0x3d: {//dec a
 				regs.setA(regs.subByte(regs.getA(), 1, true));
@@ -175,6 +191,7 @@ public class Cpu {
 			}
 			case 0x35: {//dec (hl)
 				mmu.write(regs.getHL(), regs.subByte(mmu.read(regs.getHL()), 1, true));
+				return 12;
 			}
 			
 		//inc
@@ -283,7 +300,6 @@ public class Cpu {
 
 			
 		//load reg into reg
-
 			case 0x7f: {//ld A, A
 				regs.setA(regs.getA());
 				return 4;
@@ -705,6 +721,43 @@ public class Cpu {
 				regs.setA(regs.subByte(regs.getA(), fetchByte(), false));
 				return 8;
 			}
+		//sbc // to be checked
+			case 0x9f: {//sbc a
+				regs.setA(regs.sbc(regs.getA(), regs.getA()));
+				return 4;
+			}
+			case 0x98: {//sbc b
+				regs.setA(regs.sbc(regs.getA(), regs.getB()));
+				return 4;
+			}
+			case 0x99: {//sbc c
+				regs.setA(regs.sbc(regs.getA(), regs.getC()));
+				return 4;
+			}
+			case 0x9a: {//sbc d
+				regs.setA(regs.sbc(regs.getA(), regs.getD()));
+				return 4;
+			}
+			case 0x9b: {//sbc e
+				regs.setA(regs.sbc(regs.getA(), regs.getE()));
+				return 4;
+			}
+			case 0x9c: {//sbc h
+				regs.setA(regs.sbc(regs.getA(), regs.getH()));
+				return 4;
+			}
+			case 0x9d: {//sbc d
+				regs.setA(regs.sbc(regs.getA(), regs.getD()));
+				return 4;
+			}
+			case 0x9e: {//sbc (hl)
+				regs.setA(regs.sbc(regs.getA(), mmu.read(regs.getHL())));
+				return 8;
+			}
+			case 0xde: {//sbc #
+				regs.setA(regs.sbc(regs.getA(), fetchByte())); //unknown in manual?
+				return 8;
+			}
 		//add byte
 			case 0x87: { //add a
 				regs.setA(regs.addByte(regs.getA(), regs.getA()));
@@ -871,8 +924,12 @@ public class Cpu {
 				return 8;
 			}
 		//rotate
-			case 0x17: {
-				regs.setA(regs.rotateByteLeftCarry(regs.getA()));
+			case 0x07: {//rcla
+				regs.setA(regs.rlc(regs.getA()));
+				return 4;
+			}
+			case 0x17: {//rla
+				regs.setA(regs.rl(regs.getA()));
 				return 4;
 			}
 		//compliment
@@ -910,7 +967,6 @@ public class Cpu {
 				jump((byte) fetchByte() + regs.getPC(), regs.getCarry()); 
 				return 8;
 			}
-			
 			case 0xc2: {//jp nz, nn
 				jump(fetchWord(), !regs.getZero());
 				return 12;
@@ -1006,8 +1062,24 @@ public class Cpu {
 				return 12;
 			}
 		//call
-			case 0xcd: {
+			case 0xcd: {//call nn
 				call(fetchWord(), true);
+				return 12;
+			}
+			case 0xc4: {//call Nz nn
+				call(fetchWord(), !regs.getZero());
+				return 12;
+			}
+			case 0xcc: {//call Z nn
+				call(fetchWord(), regs.getZero());
+				return 12;
+			}
+			case 0xd4: {//call Nc nn
+				call(fetchWord(), !regs.getCarry());
+				return 12;
+			}
+			case 0xdc: {//call C nn
+				call(fetchWord(), regs.getCarry());
 				return 12;
 			}
 		//return
@@ -1033,20 +1105,93 @@ public class Cpu {
 				return 8;
 			}
 			
+		//reti
+			case 0xd9: {
+				regs.setPC(popWord());
+				mmu.enableIME();
+				return 8;
+			}
+			
+		//daa
+			case 0x27: {
+				regs.setA(regs.daa(regs.getA()));
+				return 4;
+			}
+			
 		//cb
 			case 0xcb:{
 				int followIns = fetchByte();
 				//System.out.println("follow cb: " + Integer.toHexString(followIns));
 				switch(followIns) {
 					case 0x07:{
-						regs.setA(regs.rotateByteLeft(regs.getA()));
+						regs.setA(regs.rlc(regs.getA()));
 						return 8;
 					}
 					case 0x11:{//rl c
-						regs.setC(regs.rotateByteLeftCarry(regs.getC()));
+						regs.setC(regs.rl(regs.getC()));
 						return 8;
 					}
-					case 0x7c:{
+				//bit
+					case 0x50:{//bit 2, b
+						regs.checkByteBit(regs.getB(), 2);
+						return 8;
+					}
+					case 0x58:{//bit 3, b
+						regs.checkByteBit(regs.getB(), 3);
+						return 8;
+					}
+					case 0x6f:{//bit 5, a
+						regs.checkByteBit(regs.getA(), 5);
+					}
+					case 0x70:{//bit 6, b
+						regs.checkByteBit(regs.getB(), 6);
+						return 8;
+					}
+					case 0x71:{//bit 6, c
+						regs.checkByteBit(regs.getC(), 6);
+						return 8;
+					}
+					case 0x72:{//bit 6, d
+						regs.checkByteBit(regs.getD(), 6);
+						return 8;
+					}
+					case 0x73:{//bit 6, e
+						regs.checkByteBit(regs.getE(), 6);
+						return 8;
+					}
+					case 0x74:{//bit 6, h
+						regs.checkByteBit(regs.getH(), 6);
+						return 8;
+					}
+					case 0x75:{//bit 6, L
+						regs.checkByteBit(regs.getL(), 6);
+						return 8;
+					}
+					case 0x76:{//bit 6, (hl)
+						regs.checkByteBit(mmu.read(regs.getHL()), 6);
+						return 8;
+					}
+					case 0x77:{//bit 6, a
+						regs.checkByteBit(regs.getA(), 6);
+						return 8;
+					}
+					case 0x78:{//bit 7, b
+						regs.checkByteBit(regs.getB(), 7);
+						return 8;
+					}
+					case 0x79:{//bit 7, c
+						regs.checkByteBit(regs.getC(), 7);
+						return 8;
+					}
+					case 0x7a:{//bit 7, d
+						regs.checkByteBit(regs.getD(), 7);
+						return 8;
+					}
+					case 0x7b:{//bit 7, e
+						regs.checkByteBit(regs.getE(), 7);
+						return 8;
+					}
+					case 0x7c:{//bit 7, h
 						regs.checkByteBit(regs.getH(), 7);
 						return 8;
 					}
@@ -1085,7 +1230,7 @@ public class Cpu {
 					}
 				//reset
 					case 0x87:{ //res A
-						regs.setA(regs.reset(regs.getA(), 0));
+						regs.setA(regs.res(regs.getA(), 0));
 						return 8;
 					}
 					default:{
@@ -1102,12 +1247,12 @@ public class Cpu {
 			}
 		//Enable interrupt
 			case 0xfb: {
-				//TODO
+				mmu.enableIME();
 				return 4;
 			}
 		//Disable interrupt 
 			case 0xf3: {
-				//TODO
+				mmu.disableIME();
 				return 4;
 			}
 		//halt

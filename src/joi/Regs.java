@@ -131,6 +131,16 @@ public class Regs {
 		return (a - b + 256) % 256;
 	}
 	
+	public int sbc(int a, int b_) { // to be checked
+		int b = (b_ + getCarryInt() + 256) % 256;
+		zero = (a - b) % 256 == 0;
+		sub = true;
+		half = (a % 16) > (b % 16);
+		carry = a > b;
+		updateF();
+		return (a - b + 256) % 256;
+	}
+	
 	/*
 	public int subWord(int a, int b) {
 		zero = a == b;
@@ -151,42 +161,89 @@ public class Regs {
 		return (a + b) % 256;
 	}
 	
-	public int addWord(int a, int b) { //iffy, to be checked, ambitious shortcut lol
-		boolean origZero = zero;
-		int val = addByte(a/256, b/256)*256 + (a%256) + (b%256);
-		zero = origZero;
+	public int addWord(int a_, int b_) { //iffy, to be checked!!
+		int a = (a_ + 65536) % 65536;
+		int b = (b_ + 65536) % 65536;
+		sub = false;
+		half = (a % 4096) + (b % 4096) > 4096;
+		carry = a + b > 65536;
 		updateF();
-		return val;
+		return (a + b) % 65536;
 	}
 	
-	public int rotateByteLeft(int val) {
-		int lastbit = (val % 2 == 0) ? 0b11111110 : 0b11111111;
-		int result = (val << 1) & lastbit;
-		half = false;
+//rotates
+	public int rr(int val) {
+		val = (val + 256) % 256;
+		int result = carry ? ((val >> 1) + (1 << 7)) : (val >> 1);
 		sub = false;
-		carry = val > 127; //old bit 7 was 1
+		carry = false;
+		carry = (val % 2) == 0;
 		updateF();
-		return (result % 256);
+		return result % 256;
 	}
 	
-	public int rotateByteLeftCarry(int val) {
-		zero = !carry && val > 2;
+	public int rrc(int val) {
+		val = (val + 256) % 256;
+		int result = ((val) >> 1) + (val % 2)*(1 << 7);
+		zero = result == 0;
 		sub = false;
 		half = false;
+		carry = (val % 2) == 1;
+		return result;
+	}
+	
+	public int rl(int val) {
+		val = (val + 256) % 256;
 		int result = carry ? (val << 1) + 1 : val << 1;
+		result = result % 256;
+		zero = result == 0; //different docs say different things
+		sub = false;
+		half = false;
 		carry = val > 127;
 		updateF();
-		return (result % 256);
+		return result;
 	}
 	
-	public int rotateByteRightCarry(int val) {
-		zero = !carry && val/2 == 0;
+	public int rlc(int val) {
+		val = (val + 256) % 256; 
+		int result = ((val << 1) + ((val >> 7) % 2)) % 256;
+		zero = result == 0; //different docs say different things
 		sub = false;
 		half = false;
-		int result = carry ? (val >> 1) + 128 : val >> 1;
-		carry = (val % 2) == 1;
+		carry = ((val >> 7) % 2) == 1;
 		updateF();
-		return (result % 256);
+		return result;
+	}
+	
+//shifts
+	public int sla(int val) {
+		val = (val + 256) % 256;
+		int result = (val << 1) % 256;
+		zero = result == 0;
+		sub = false;
+		half = false;
+		carry = val > 127;
+		return result;
+	}
+	
+	public int sra(int val) {
+		val = (val + 256) % 256;
+		int result = (val >> 1) + ((val >> 7) & 1)*(1 << 7);
+		zero = result == 0;
+		sub = false;
+		half = false;
+		carry = (val % 2) == 1;
+		return result;
+	}
+	
+	public int srl(int val) {
+		val = (val + 256) % 256;
+		int result = (val >> 1);
+		zero = result == 0;
+		sub = false;
+		half = false;
+		carry = (val % 2) == 1;
+		return result;
 	}
 	
 	public void checkByteBit(int val, int bitIndex) {
@@ -218,8 +275,7 @@ public class Regs {
 	
 	public int and(int a, int b) {
 		int val = ((a + 256)%256) & ((b + 256)%256);
-		if(val == 0)
-			zero = true;
+		zero = (val == 0);
 		sub = false;
 		half = true;
 		carry = false;
@@ -241,19 +297,49 @@ public class Regs {
 		if(result == 0)
 			zero = true;
 		sub = false;
-		half = true;
+		half = false;
 		carry = false;
 		updateF();
 		return result;
 	}
 	
-	public int reset(int val, int bit) {//only for bytes, may have to change idk
+	public int res(int val, int bit) {//only for bytes, may have to change idk
 		int toAnd = 0b11111111;
-		int toSub = 1;
-		for(int i = 0; i < bit; i++) //don't wanna deal with floats
-			toSub *= 2;
+		int toSub = 1 << bit;
 		toAnd -= toSub;
 		updateF();
 		return ((val + 256)%256) & toAnd;
+	}
+	
+	public int set(int val, int bit) {//to be checked
+		int toOr = 1 << bit;
+		val = (val + 256) % 256;
+		return val | toOr;
+	}
+	
+	public int daa(int val) {//daa to be checked
+		int result = val;
+		if(!sub) {
+			if(carry || result > 0x99) {
+				result += 0x60;
+				carry = true;
+			}
+			if(half || (result & 0x0f) > 0x09) {
+				result += 0x06;
+			}
+		}
+		else {
+			if(carry) {
+				result -= 0x60;
+				carry = true;
+			}
+			if(half) {
+				result -= 0x6;
+			}
+		}
+		result = (result + 256) % 256;
+		carry = result == 0;
+		half = false;
+		return result;
 	}
 }

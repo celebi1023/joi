@@ -26,7 +26,9 @@ public class MMU {
 	private int[][] tileSet1;
 	public int[][] tileMap0; //is this bad practice lol idk
 	private int[][] returnTile; //used for getTile()
+	private int[] returnTileLine;
 	public boolean pause; //strictly for testing@!!!!!!!!!!!!!!!!
+	private boolean ime;
 	
 	public MMU(String fileName) {
 		memory = new byte[0x10000];
@@ -34,11 +36,21 @@ public class MMU {
 		tileSet1 = new int[1000][16];
 		tileMap0 = new int[32][32]; //for now: starting from 
 		returnTile = new int[8][8];
+		returnTileLine = new int[8];
+		ime = false;
 		openRom(fileName);
 		pause = false;
 	}
 	
+	public void enableIME() {ime = true;}
+	public void disableIME() {ime = false;}
+	public boolean getIME() {return ime;}
+	
 	public void write(int address, int val) {
+		if(address == 0xff05) {
+			System.out.println("loading into 0xff05: " + val);
+			//pause = true;
+		}
 		if(0x0000 <= address && address < 0x8000) {
 			return; //can't write to rom i think?
 		}
@@ -60,17 +72,29 @@ public class MMU {
 		if(0x9800 <= address && address <= 0x9bff) {//tileMap #0 (just using this for now)
 			int index1 = (address - 0x9800)/32;
 			int index2 = (address - 0x8000)% 32;
-			tileMap0[index1][index2] = val;
+			tileMap0[index1][index2] = val % 256;
 		}
+		
+		if(address == 0xff46) {
+			for(int i = 0; i < 160; i++)
+				write(0xfe00 + i, read((val << 8) + i));
+		}
+		
 		memory[address] = (byte) val;
 	}
 	
 	public int read(int address) {
 		if(Byte.toUnsignedInt(memory[0xff50]) != 1 && address < 0x0100)
 			return Byte.toUnsignedInt(boot[address]);
+		
+		if(address == 0xff00) { //joypad, will return 1111 for now
+			//gonna do this for now
+			return ((Byte.toUnsignedInt(memory[address])) | 0b11001111); //TODO
+		}
+		
 		return Byte.toUnsignedInt(memory[address]);
 	}
-	
+	/*//relic of past inefficiency, will keep as reference haha
 	public int[][] getTile(int index) {
 		//using returnTile to return
 		int[][]tileSet = (read(0xff40)/16% 2 == 1) ? tileSet0 : tileSet1;
@@ -90,6 +114,22 @@ public class MMU {
 		}
 		return returnTile;
 	}
+	*/
+	public int[] getTileLine(int index, int line) {
+		int[][]tileSet = (read(0xff40)/16% 2 == 1) ? tileSet0 : tileSet1;
+		String first = Integer.toBinaryString(tileSet[index][2*line]);
+		String second = Integer.toBinaryString(tileSet[index][2*line + 1]);
+		while(first.length() < 8)
+			first = '0' + first;
+		while(second.length() < 8)
+			second = '0' + second;
+		for(int j = 0; j < 8; j++) {
+			int firstBit = (first.charAt(j) == '1') ? 1 : 0;
+			int secondBit = (second.charAt(j) == '1') ? 1 : 0;
+			returnTileLine[j] = firstBit + secondBit * 2;
+		}
+		return returnTileLine;
+	}
 	
 	private void openRom(String fileName) {
 		try {
@@ -103,49 +143,21 @@ public class MMU {
 			for(int i = 0; i < cart.length; i++) {
 				write(i, Byte.toUnsignedInt(cart[i]));
 			}
-			System.out.println("Successfully cartridge into memory");
+			System.out.println("Successfully loaded cartridge into memory");
 			
 			
 			//commented out for testing
 			String startup = "DMG_ROM.bin";
 			//startup = "BootRomMod.bin";
 			boot = Files.readAllBytes(Paths.get("./roms/" + startup));
-			
-			/*
-			for(int i = 0; i < boot.length; i++) {
-				memory[i] = boot[i];
-				System.out.println("index: " + Integer.toHexString(i) + " " + Integer.toHexString(Byte.toUnsignedInt(boot[i])));
-			}
-			*/
-			
-			System.out.println("test: " + Integer.toHexString(memory[0x101]));
-			System.out.println("Successfully bootrom into memory");
-			
-			
-			
-			/*
-			for(int i = 0; i < boot.length; i++)
-				System.out.println(Integer.toHexString(Byte.toUnsignedInt(boot[i])));
-			*/
-			//System.out.println(Integer.toHexString(read(0x0151)));
-			
-			/*for(int i = 0; i < 256; i++) {
-				int[][] tempTile = getTile(i);
-				System.out.println("Tile: " + i + " flag: " + (read(0xff40)/16 % 2 == 1));
-				for(int j = 0; j < tempTile.length; j++)
-					System.out.println(Arrays.toString(tempTile[j]));
-			}
-			
-			for(int i = 0x8000; i < 0x8500; i++)
-				System.out.println(Integer.toHexString(i) + " " + Integer.toHexString(read(i)));
-			
-			*/
+			System.out.println("Successfully loaded bootrom into memory");
+
 			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
+	/*
 	public void printBackground() {//for testing
 		int [][] result = new int[32*8][32*8];
 		for(int i = 0; i < 32; i++) {
@@ -180,5 +192,5 @@ public class MMU {
 		}
 		System.out.println(sum);
 	}
-
+	*/
 }

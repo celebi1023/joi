@@ -30,6 +30,10 @@ public class PPU {
 	int cycles;
 	int scanline;
 	
+	int test1;
+	double time1;
+	double time2;
+	
 	int[][]windowBuffer;
 	
 	public PPU(MMU m) {
@@ -37,6 +41,10 @@ public class PPU {
 		monitor = new Display(160, 144);
 		mode = modeOAM; //no idea
 		windowBuffer = new int[144][160];
+		
+		test1 = 0;
+		time1 = 0;
+		time2 = 0;
 	}
 
 	public void step(int cycleIncrease) { //cycle increase could be incorrect, gonna use it like this for now
@@ -64,55 +72,19 @@ public class PPU {
 					cycles = 0;
 					scanline++;
 					if(scanline == 143) {
+						//vblank interrupt
+						if((mmu.read(0xffff) % 2) == 1) {
+							mmu.write(0xff0f, (mmu.read(0xff0f) | 0b00000001));
+						}
 						mode = modeVBLANK;
-						//update frame (or maybe wait until vblank to update? idk)
-						/*
-						for(int i = 0; i < windowBuffer.length; i++) {
-							for(int j = 0; j < windowBuffer[i].length; j++) {
-								System.out.print(windowBuffer[i][j]);
-							}
-							System.out.println();
-						}*/
-						
-						//mmu.printBackground();
-						/*
-						for(int i = 0; i < mmu.getTile(1).length; i++){
-							System.out.println(Arrays.toString(mmu.getTile(1)[i]));
-						}
-						for(int i = 0; i < mmu.tileMap0.length; i++)
-							System.out.println(Arrays.toString(mmu.tileMap0[i]));
-						System.out.println();
-						mmu.backgroundSum();
-						*/
-						if(mmu.pause) {
-							/*
-							System.out.println("success");
-							for(int i = 0; i < mmu.getTile(1).length; i++){
-								System.out.println(Arrays.toString(mmu.getTile(1)[i]));
-							}
-							for(int i = 0; i < mmu.tileMap0.length; i++)
-								System.out.println(Arrays.toString(mmu.tileMap0[i]));
-							System.out.println();
-							mmu.backgroundSum();
-							
-							//work
-							
-							scanline = 0;
-							while(scanline < 144) {
-								renderLine();
-								scanline++;
-								for(int i = 0; i < windowBuffer.length; i++)
-									System.out.println(Arrays.toString(windowBuffer[i]));
-								System.out.println();
-							}
-							*/
-							System.out.println("exiting");
-							System.exit(1);
-						}
+
 						//UPDATE SCREEN -------------------------------
 						//window buffer is ready
 						monitor.render(windowBuffer, true);
 						monitor.showAsFrame();
+						time2 = time1;
+						time1 = System.nanoTime()/1000000000.0;
+						System.out.println(time1 - time2);
 					}
 					else {
 						mode = modeOAM;
@@ -137,6 +109,7 @@ public class PPU {
 	}
 	
 	private void renderLine() {
+		/*
 		int x = mmu.read(scrollX);
 		int y = mmu.read(scrollY) + scanline;
 		int[][] currentTile = mmu.getTile(mmu.tileMap0[y/8][x/8]);
@@ -144,8 +117,25 @@ public class PPU {
 			if((x + i) % 8 == 0) {
 				currentTile = mmu.getTile(mmu.tileMap0[y/8][(x + i)/8]);
 			}
-			windowBuffer[scanline][i] = currentTile[y % 8][(x + i) % 8];
+			int pixel = currentTile[y % 8][(x + i) % 8];
+			
+			int palette = mmu.read(0xff47);
+			windowBuffer[scanline][i] = ((palette >> (2 * pixel + 1)) % 2) * 2 + ((palette >> (2 * pixel)) % 2);
 		}
+		*/
+		int x = mmu.read(scrollX);
+		int y = mmu.read(scrollY) + scanline;
+		int[] currentTileLine = mmu.getTileLine(mmu.tileMap0[y/8][x/8], y % 8);
+		for(int i = 0; i < 160; i++) {
+			if((x + i) % 8 == 0) {
+				currentTileLine = mmu.getTileLine(mmu.tileMap0[y/8][(x + i)/8], y % 8);
+			}
+			int pixel = currentTileLine[(x + i) % 8];
+			
+			int palette = mmu.read(0xff47);
+			windowBuffer[scanline][i] = ((palette >> (2 * pixel + 1)) % 2) * 2 + ((palette >> (2 * pixel)) % 2);
+		}
+		
 	}
 	
 }
