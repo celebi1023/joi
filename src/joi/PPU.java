@@ -152,7 +152,7 @@ public class PPU {
 							if(windowBuffer[y + iterY][x + iterX] == 0) {
 								int pixel = currentTile[iterY][iterX];
 								int color = ((palette >> (2 * pixel + 1)) % 2) * 2 + ((palette >> (2 * pixel)) % 2);
-								if(pixel != 0)
+								if(pixel != 0 && (y + iterY) < 145 && (x + iterX) < 161)
 									windowBuffer[y + iterY][x + iterX] = color;
 							}
 						}
@@ -164,6 +164,7 @@ public class PPU {
 		for(int i = 0; i < 40; i++) {
 			int y = mmu.read(0xfe00 + 4*i);
 			int x = mmu.read(0xfe00 + 4*i + 1);
+			//System.out.println(Integer.toHexString(0xfe00 + 4*i) + " y: " + y + " x: " + x);
 			if(y != 0 && x != 0) {
 				y = y - 16;
 				x = x - 8;
@@ -183,7 +184,7 @@ public class PPU {
 						for(int iterX = startX; (iterX < 8 && iterX >= 0); iterX += incX) {
 								int pixel = currentTile[iterY][iterX];
 								int color = ((palette >> (2 * pixel + 1)) % 2) * 2 + ((palette >> (2 * pixel)) % 2);
-								if(pixel != 0)
+								if(pixel != 0 && (y + iterY) < 145 && (x + iterX) < 161)
 									windowBuffer[y + iterY][x + iterX] = color;
 						}
 					}

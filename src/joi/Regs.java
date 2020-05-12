@@ -246,7 +246,7 @@ public class Regs {
 		return result;
 	}
 	
-	public void checkByteBit(int val, int bitIndex) {
+	public void bit(int val, int bitIndex) {
 		val = (val >> bitIndex) % 2;
 		zero = val == 0;
 		sub = false;
@@ -290,7 +290,7 @@ public class Regs {
 		return 255 - ((val + 256)%256);
 	}
 	
-	public int swapByte(int val) {
+	public int swap(int val) {
 		int top = ((val + 256)%256)/16;
 		int bot = ((val + 256)%256)%16;
 		int result = bot * 16 + top;

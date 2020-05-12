@@ -1123,116 +1123,1031 @@ public class Cpu {
 				int followIns = fetchByte();
 				//System.out.println("follow cb: " + Integer.toHexString(followIns));
 				switch(followIns) {
-					case 0x07:{
+					case 0x00:{ //rlc b
+						regs.setB(regs.rlc(regs.getB()));
+						return 8;
+					}
+					case 0x01:{ //rlc c
+						regs.setC(regs.rlc(regs.getC()));
+						return 8;
+					}
+					case 0x02:{ //rlc d
+						regs.setD(regs.rlc(regs.getD()));
+						return 8;
+					}
+					case 0x03:{ //rlc e
+						regs.setE(regs.rlc(regs.getE()));
+						return 8;
+					}
+					case 0x04:{ //rlc h
+						regs.setH(regs.rlc(regs.getH()));
+						return 8;
+					}
+					case 0x05:{ //rlc l
+						regs.setL(regs.rlc(regs.getL()));
+						return 8;
+					}
+					case 0x06:{ //rlc (hl)
+						mmu.write(regs.getHL(), regs.rlc(mmu.read(regs.getHL())));
+						return 16;
+					}
+					case 0x07:{ //rlc a
 						regs.setA(regs.rlc(regs.getA()));
 						return 8;
 					}
-					case 0x11:{//rl c
+					case 0x08:{ //rrc b
+						regs.setB(regs.rrc(regs.getB()));
+						return 8;
+					}
+					case 0x09:{ //rrc c
+						regs.setC(regs.rrc(regs.getC()));
+						return 8;
+					}
+					case 0x0a:{ //rrc d
+						regs.setD(regs.rrc(regs.getD()));
+						return 8;
+					}
+					case 0x0b:{ //rrc e
+						regs.setE(regs.rrc(regs.getE()));
+						return 8;
+					}
+					case 0x0c:{ //rrc h
+						regs.setH(regs.rrc(regs.getH()));
+						return 8;
+					}
+					case 0x0d:{ //rrc l
+						regs.setL(regs.rrc(regs.getL()));
+						return 8;
+					}
+					case 0x0e:{ //rrc (hl)
+						mmu.write(regs.getHL(), regs.rrc(mmu.read(regs.getHL())));
+						return 16;
+					}
+					case 0x0f:{ //rrc a
+						regs.setA(regs.rrc(regs.getA()));
+						return 8;
+					}
+					case 0x10:{ //rl b
+						regs.setB(regs.rl(regs.getB()));
+						return 8;
+					}
+					case 0x11:{ //rl c
 						regs.setC(regs.rl(regs.getC()));
 						return 8;
 					}
-				//bit
-					case 0x50:{//bit 2, b
-						regs.checkByteBit(regs.getB(), 2);
+					case 0x12:{ //rl d
+						regs.setD(regs.rl(regs.getD()));
 						return 8;
 					}
-					case 0x58:{//bit 3, b
-						regs.checkByteBit(regs.getB(), 3);
+					case 0x13:{ //rl e
+						regs.setE(regs.rl(regs.getE()));
 						return 8;
 					}
-					case 0x6f:{//bit 5, a
-						regs.checkByteBit(regs.getA(), 5);
-					}
-					case 0x70:{//bit 6, b
-						regs.checkByteBit(regs.getB(), 6);
+					case 0x14:{ //rl h
+						regs.setH(regs.rl(regs.getH()));
 						return 8;
 					}
-					case 0x71:{//bit 6, c
-						regs.checkByteBit(regs.getC(), 6);
+					case 0x15:{ //rl l
+						regs.setL(regs.rl(regs.getL()));
 						return 8;
 					}
-					case 0x72:{//bit 6, d
-						regs.checkByteBit(regs.getD(), 6);
+					case 0x16:{ //rl (hl)
+						mmu.write(regs.getHL(), regs.rl(mmu.read(regs.getHL())));
+						return 16;
+					}
+					case 0x17:{ //rl a
+						regs.setA(regs.rl(regs.getA()));
 						return 8;
 					}
-					case 0x73:{//bit 6, e
-						regs.checkByteBit(regs.getE(), 6);
+					case 0x18:{ //rr b
+						regs.setB(regs.rr(regs.getB()));
 						return 8;
 					}
-					case 0x74:{//bit 6, h
-						regs.checkByteBit(regs.getH(), 6);
+					case 0x19:{ //rr c
+						regs.setC(regs.rr(regs.getC()));
 						return 8;
 					}
-					case 0x75:{//bit 6, L
-						regs.checkByteBit(regs.getL(), 6);
+					case 0x1a:{ //rr d
+						regs.setD(regs.rr(regs.getD()));
 						return 8;
 					}
-					case 0x76:{//bit 6, (hl)
-						regs.checkByteBit(mmu.read(regs.getHL()), 6);
+					case 0x1b:{ //rr e
+						regs.setE(regs.rr(regs.getE()));
 						return 8;
 					}
-					case 0x77:{//bit 6, a
-						regs.checkByteBit(regs.getA(), 6);
+					case 0x1c:{ //rr h
+						regs.setH(regs.rr(regs.getH()));
 						return 8;
 					}
-					case 0x78:{//bit 7, b
-						regs.checkByteBit(regs.getB(), 7);
+					case 0x1d:{ //rr l
+						regs.setL(regs.rr(regs.getL()));
 						return 8;
 					}
-					case 0x79:{//bit 7, c
-						regs.checkByteBit(regs.getC(), 7);
+					case 0x1e:{ //rr (hl)
+						mmu.write(regs.getHL(), regs.rr(mmu.read(regs.getHL())));
+						return 16;
+					}
+					case 0x1f:{ //rr a
+						regs.setA(regs.rr(regs.getA()));
 						return 8;
 					}
-					case 0x7a:{//bit 7, d
-						regs.checkByteBit(regs.getD(), 7);
+					case 0x20:{ //sla b
+						regs.setB(regs.sla(regs.getB()));
 						return 8;
 					}
-					case 0x7b:{//bit 7, e
-						regs.checkByteBit(regs.getE(), 7);
+					case 0x21:{ //sla c
+						regs.setC(regs.sla(regs.getC()));
 						return 8;
 					}
-					case 0x7c:{//bit 7, h
-						regs.checkByteBit(regs.getH(), 7);
+					case 0x22:{ //sla d
+						regs.setD(regs.sla(regs.getD()));
 						return 8;
 					}
-				//swap
-					case 0x37:{ //swap a
-						regs.setA(regs.swapByte(regs.getA()));
+					case 0x23:{ //sla e
+						regs.setE(regs.sla(regs.getE()));
+						return 8;
+					}
+					case 0x24:{ //sla h
+						regs.setH(regs.sla(regs.getH()));
+						return 8;
+					}
+					case 0x25:{ //sla l
+						regs.setL(regs.sla(regs.getL()));
+						return 8;
+					}
+					case 0x26:{ //sla (hl)
+						mmu.write(regs.getHL(), regs.sla(mmu.read(regs.getHL())));
+						return 16;
+					}
+					case 0x27:{ //sla a
+						regs.setA(regs.sla(regs.getA()));
+						return 8;
+					}
+					case 0x28:{ //sra b
+						regs.setB(regs.sra(regs.getB()));
+						return 8;
+					}
+					case 0x29:{ //sra c
+						regs.setC(regs.sra(regs.getC()));
+						return 8;
+					}
+					case 0x2a:{ //sra d
+						regs.setD(regs.sra(regs.getD()));
+						return 8;
+					}
+					case 0x2b:{ //sra e
+						regs.setE(regs.sra(regs.getE()));
+						return 8;
+					}
+					case 0x2c:{ //sra h
+						regs.setH(regs.sra(regs.getH()));
+						return 8;
+					}
+					case 0x2d:{ //sra l
+						regs.setL(regs.sra(regs.getL()));
+						return 8;
+					}
+					case 0x2e:{ //sra (hl)
+						mmu.write(regs.getHL(), regs.sra(mmu.read(regs.getHL())));
+						return 16;
+					}
+					case 0x2f:{ //sra a
+						regs.setA(regs.sra(regs.getA()));
 						return 8;
 					}
 					case 0x30:{ //swap b
-						regs.setB(regs.swapByte(regs.getB()));
+						regs.setB(regs.swap(regs.getB()));
 						return 8;
 					}
 					case 0x31:{ //swap c
-						regs.setC(regs.swapByte(regs.getC()));
+						regs.setC(regs.swap(regs.getC()));
 						return 8;
 					}
 					case 0x32:{ //swap d
-						regs.setD(regs.swapByte(regs.getD()));
+						regs.setD(regs.swap(regs.getD()));
 						return 8;
 					}
 					case 0x33:{ //swap e
-						regs.setE(regs.swapByte(regs.getE()));
+						regs.setE(regs.swap(regs.getE()));
 						return 8;
 					}
 					case 0x34:{ //swap h
-						regs.setH(regs.swapByte(regs.getH()));
+						regs.setH(regs.swap(regs.getH()));
 						return 8;
 					}
 					case 0x35:{ //swap l
-						regs.setL(regs.swapByte(regs.getL()));
+						regs.setL(regs.swap(regs.getL()));
 						return 8;
 					}
 					case 0x36:{ //swap (hl)
-						mmu.write(regs.getHL(), regs.swapByte(mmu.read(regs.getHL())));
+						mmu.write(regs.getHL(), regs.swap(mmu.read(regs.getHL())));
 						return 16;
 					}
-				//reset
-					case 0x87:{ //res A
+					case 0x37:{ //swap a
+						regs.setA(regs.swap(regs.getA()));
+						return 8;
+					}
+					case 0x38:{ //srl b
+						regs.setB(regs.srl(regs.getB()));
+						return 8;
+					}
+					case 0x39:{ //srl c
+						regs.setC(regs.srl(regs.getC()));
+						return 8;
+					}
+					case 0x3a:{ //srl d
+						regs.setD(regs.srl(regs.getD()));
+						return 8;
+					}
+					case 0x3b:{ //srl e
+						regs.setE(regs.srl(regs.getE()));
+						return 8;
+					}
+					case 0x3c:{ //srl h
+						regs.setH(regs.srl(regs.getH()));
+						return 8;
+					}
+					case 0x3d:{ //srl l
+						regs.setL(regs.srl(regs.getL()));
+						return 8;
+					}
+					case 0x3e:{ //srl (hl)
+						mmu.write(regs.getHL(), regs.srl(mmu.read(regs.getHL())));
+						return 16;
+					}
+					case 0x3f:{ //srl a
+						regs.setA(regs.srl(regs.getA()));
+						return 8;
+					}
+					case 0x40:{ //bit 0, b
+						regs.bit(regs.getB(), 0);
+						return 8;
+					}
+					case 0x41:{ //bit 0, c
+						regs.bit(regs.getC(), 0);
+						return 8;
+					}
+					case 0x42:{ //bit 0, d
+						regs.bit(regs.getD(), 0);
+						return 8;
+					}
+					case 0x43:{ //bit 0, e
+						regs.bit(regs.getE(), 0);
+						return 8;
+					}
+					case 0x44:{ //bit 0, h
+						regs.bit(regs.getH(), 0);
+						return 8;
+					}
+					case 0x45:{ //bit 0, l
+						regs.bit(regs.getL(), 0);
+						return 8;
+					}
+					case 0x46:{ //bit 0, (hl)
+						regs.bit(mmu.read(regs.getHL()), 0);
+						return 16;
+					}
+					case 0x47:{ //bit 0, a
+						regs.bit(regs.getA(), 0);
+						return 8;
+					}
+					case 0x48:{ //bit 1, b
+						regs.bit(regs.getB(), 1);
+						return 8;
+					}
+					case 0x49:{ //bit 1, c
+						regs.bit(regs.getC(), 1);
+						return 8;
+					}
+					case 0x4a:{ //bit 1, d
+						regs.bit(regs.getD(), 1);
+						return 8;
+					}
+					case 0x4b:{ //bit 1, e
+						regs.bit(regs.getE(), 1);
+						return 8;
+					}
+					case 0x4c:{ //bit 1, h
+						regs.bit(regs.getH(), 1);
+						return 8;
+					}
+					case 0x4d:{ //bit 1, l
+						regs.bit(regs.getL(), 1);
+						return 8;
+					}
+					case 0x4e:{ //bit 1, (hl)
+						regs.bit(mmu.read(regs.getHL()), 1);
+						return 16;
+					}
+					case 0x4f:{ //bit 1, a
+						regs.bit(regs.getA(), 1);
+						return 8;
+					}
+					case 0x50:{ //bit 2, b
+						regs.bit(regs.getB(), 2);
+						return 8;
+					}
+					case 0x51:{ //bit 2, c
+						regs.bit(regs.getC(), 2);
+						return 8;
+					}
+					case 0x52:{ //bit 2, d
+						regs.bit(regs.getD(), 2);
+						return 8;
+					}
+					case 0x53:{ //bit 2, e
+						regs.bit(regs.getE(), 2);
+						return 8;
+					}
+					case 0x54:{ //bit 2, h
+						regs.bit(regs.getH(), 2);
+						return 8;
+					}
+					case 0x55:{ //bit 2, l
+						regs.bit(regs.getL(), 2);
+						return 8;
+					}
+					case 0x56:{ //bit 2, (hl)
+						regs.bit(mmu.read(regs.getHL()), 2);
+						return 16;
+					}
+					case 0x57:{ //bit 2, a
+						regs.bit(regs.getA(), 2);
+						return 8;
+					}
+					case 0x58:{ //bit 3, b
+						regs.bit(regs.getB(), 3);
+						return 8;
+					}
+					case 0x59:{ //bit 3, c
+						regs.bit(regs.getC(), 3);
+						return 8;
+					}
+					case 0x5a:{ //bit 3, d
+						regs.bit(regs.getD(), 3);
+						return 8;
+					}
+					case 0x5b:{ //bit 3, e
+						regs.bit(regs.getE(), 3);
+						return 8;
+					}
+					case 0x5c:{ //bit 3, h
+						regs.bit(regs.getH(), 3);
+						return 8;
+					}
+					case 0x5d:{ //bit 3, l
+						regs.bit(regs.getL(), 3);
+						return 8;
+					}
+					case 0x5e:{ //bit 3, (hl)
+						regs.bit(mmu.read(regs.getHL()), 3);
+						return 16;
+					}
+					case 0x5f:{ //bit 3, a
+						regs.bit(regs.getA(), 3);
+						return 8;
+					}
+					case 0x60:{ //bit 4, b
+						regs.bit(regs.getB(), 4);
+						return 8;
+					}
+					case 0x61:{ //bit 4, c
+						regs.bit(regs.getC(), 4);
+						return 8;
+					}
+					case 0x62:{ //bit 4, d
+						regs.bit(regs.getD(), 4);
+						return 8;
+					}
+					case 0x63:{ //bit 4, e
+						regs.bit(regs.getE(), 4);
+						return 8;
+					}
+					case 0x64:{ //bit 4, h
+						regs.bit(regs.getH(), 4);
+						return 8;
+					}
+					case 0x65:{ //bit 4, l
+						regs.bit(regs.getL(), 4);
+						return 8;
+					}
+					case 0x66:{ //bit 4, (hl)
+						regs.bit(mmu.read(regs.getHL()), 4);
+						return 16;
+					}
+					case 0x67:{ //bit 4, a
+						regs.bit(regs.getA(), 4);
+						return 8;
+					}
+					case 0x68:{ //bit 5, b
+						regs.bit(regs.getB(), 5);
+						return 8;
+					}
+					case 0x69:{ //bit 5, c
+						regs.bit(regs.getC(), 5);
+						return 8;
+					}
+					case 0x6a:{ //bit 5, d
+						regs.bit(regs.getD(), 5);
+						return 8;
+					}
+					case 0x6b:{ //bit 5, e
+						regs.bit(regs.getE(), 5);
+						return 8;
+					}
+					case 0x6c:{ //bit 5, h
+						regs.bit(regs.getH(), 5);
+						return 8;
+					}
+					case 0x6d:{ //bit 5, l
+						regs.bit(regs.getL(), 5);
+						return 8;
+					}
+					case 0x6e:{ //bit 5, (hl)
+						regs.bit(mmu.read(regs.getHL()), 5);
+						return 16;
+					}
+					case 0x6f:{ //bit 5, a
+						regs.bit(regs.getA(), 5);
+						return 8;
+					}
+					case 0x70:{ //bit 6, b
+						regs.bit(regs.getB(), 6);
+						return 8;
+					}
+					case 0x71:{ //bit 6, c
+						regs.bit(regs.getC(), 6);
+						return 8;
+					}
+					case 0x72:{ //bit 6, d
+						regs.bit(regs.getD(), 6);
+						return 8;
+					}
+					case 0x73:{ //bit 6, e
+						regs.bit(regs.getE(), 6);
+						return 8;
+					}
+					case 0x74:{ //bit 6, h
+						regs.bit(regs.getH(), 6);
+						return 8;
+					}
+					case 0x75:{ //bit 6, l
+						regs.bit(regs.getL(), 6);
+						return 8;
+					}
+					case 0x76:{ //bit 6, (hl)
+						regs.bit(mmu.read(regs.getHL()), 6);
+						return 16;
+					}
+					case 0x77:{ //bit 6, a
+						regs.bit(regs.getA(), 6);
+						return 8;
+					}
+					case 0x78:{ //bit 7, b
+						regs.bit(regs.getB(), 7);
+						return 8;
+					}
+					case 0x79:{ //bit 7, c
+						regs.bit(regs.getC(), 7);
+						return 8;
+					}
+					case 0x7a:{ //bit 7, d
+						regs.bit(regs.getD(), 7);
+						return 8;
+					}
+					case 0x7b:{ //bit 7, e
+						regs.bit(regs.getE(), 7);
+						return 8;
+					}
+					case 0x7c:{ //bit 7, h
+						regs.bit(regs.getH(), 7);
+						return 8;
+					}
+					case 0x7d:{ //bit 7, l
+						regs.bit(regs.getL(), 7);
+						return 8;
+					}
+					case 0x7e:{ //bit 7, (hl)
+						regs.bit(mmu.read(regs.getHL()), 7);
+						return 16;
+					}
+					case 0x7f:{ //bit 7, a
+						regs.bit(regs.getA(), 7);
+						return 8;
+					}
+					case 0x80:{ //res 0, b
+						regs.setB(regs.res(regs.getB(), 0));
+						return 8;
+					}
+					case 0x81:{ //res 0, c
+						regs.setC(regs.res(regs.getC(), 0));
+						return 8;
+					}
+					case 0x82:{ //res 0, d
+						regs.setD(regs.res(regs.getD(), 0));
+						return 8;
+					}
+					case 0x83:{ //res 0, e
+						regs.setE(regs.res(regs.getE(), 0));
+						return 8;
+					}
+					case 0x84:{ //res 0, h
+						regs.setH(regs.res(regs.getH(), 0));
+						return 8;
+					}
+					case 0x85:{ //res 0, l
+						regs.setL(regs.res(regs.getL(), 0));
+						return 8;
+					}
+					case 0x86:{ //res 0, (hl)
+						mmu.write(regs.getHL(), regs.res(mmu.read(regs.getHL()), 0));
+						return 16;
+					}
+					case 0x87:{ //res 0, a
 						regs.setA(regs.res(regs.getA(), 0));
 						return 8;
 					}
+					case 0x88:{ //res 1, b
+						regs.setB(regs.res(regs.getB(), 1));
+						return 8;
+					}
+					case 0x89:{ //res 1, c
+						regs.setC(regs.res(regs.getC(), 1));
+						return 8;
+					}
+					case 0x8a:{ //res 1, d
+						regs.setD(regs.res(regs.getD(), 1));
+						return 8;
+					}
+					case 0x8b:{ //res 1, e
+						regs.setE(regs.res(regs.getE(), 1));
+						return 8;
+					}
+					case 0x8c:{ //res 1, h
+						regs.setH(regs.res(regs.getH(), 1));
+						return 8;
+					}
+					case 0x8d:{ //res 1, l
+						regs.setL(regs.res(regs.getL(), 1));
+						return 8;
+					}
+					case 0x8e:{ //res 1, (hl)
+						mmu.write(regs.getHL(), regs.res(mmu.read(regs.getHL()), 1));
+						return 16;
+					}
+					case 0x8f:{ //res 1, a
+						regs.setA(regs.res(regs.getA(), 1));
+						return 8;
+					}
+					case 0x90:{ //res 2, b
+						regs.setB(regs.res(regs.getB(), 2));
+						return 8;
+					}
+					case 0x91:{ //res 2, c
+						regs.setC(regs.res(regs.getC(), 2));
+						return 8;
+					}
+					case 0x92:{ //res 2, d
+						regs.setD(regs.res(regs.getD(), 2));
+						return 8;
+					}
+					case 0x93:{ //res 2, e
+						regs.setE(regs.res(regs.getE(), 2));
+						return 8;
+					}
+					case 0x94:{ //res 2, h
+						regs.setH(regs.res(regs.getH(), 2));
+						return 8;
+					}
+					case 0x95:{ //res 2, l
+						regs.setL(regs.res(regs.getL(), 2));
+						return 8;
+					}
+					case 0x96:{ //res 2, (hl)
+						mmu.write(regs.getHL(), regs.res(mmu.read(regs.getHL()), 2));
+						return 16;
+					}
+					case 0x97:{ //res 2, a
+						regs.setA(regs.res(regs.getA(), 2));
+						return 8;
+					}
+					case 0x98:{ //res 3, b
+						regs.setB(regs.res(regs.getB(), 3));
+						return 8;
+					}
+					case 0x99:{ //res 3, c
+						regs.setC(regs.res(regs.getC(), 3));
+						return 8;
+					}
+					case 0x9a:{ //res 3, d
+						regs.setD(regs.res(regs.getD(), 3));
+						return 8;
+					}
+					case 0x9b:{ //res 3, e
+						regs.setE(regs.res(regs.getE(), 3));
+						return 8;
+					}
+					case 0x9c:{ //res 3, h
+						regs.setH(regs.res(regs.getH(), 3));
+						return 8;
+					}
+					case 0x9d:{ //res 3, l
+						regs.setL(regs.res(regs.getL(), 3));
+						return 8;
+					}
+					case 0x9e:{ //res 3, (hl)
+						mmu.write(regs.getHL(), regs.res(mmu.read(regs.getHL()), 3));
+						return 16;
+					}
+					case 0x9f:{ //res 3, a
+						regs.setA(regs.res(regs.getA(), 3));
+						return 8;
+					}
+					case 0xa0:{ //res 4, b
+						regs.setB(regs.res(regs.getB(), 4));
+						return 8;
+					}
+					case 0xa1:{ //res 4, c
+						regs.setC(regs.res(regs.getC(), 4));
+						return 8;
+					}
+					case 0xa2:{ //res 4, d
+						regs.setD(regs.res(regs.getD(), 4));
+						return 8;
+					}
+					case 0xa3:{ //res 4, e
+						regs.setE(regs.res(regs.getE(), 4));
+						return 8;
+					}
+					case 0xa4:{ //res 4, h
+						regs.setH(regs.res(regs.getH(), 4));
+						return 8;
+					}
+					case 0xa5:{ //res 4, l
+						regs.setL(regs.res(regs.getL(), 4));
+						return 8;
+					}
+					case 0xa6:{ //res 4, (hl)
+						mmu.write(regs.getHL(), regs.res(mmu.read(regs.getHL()), 4));
+						return 16;
+					}
+					case 0xa7:{ //res 4, a
+						regs.setA(regs.res(regs.getA(), 4));
+						return 8;
+					}
+					case 0xa8:{ //res 5, b
+						regs.setB(regs.res(regs.getB(), 5));
+						return 8;
+					}
+					case 0xa9:{ //res 5, c
+						regs.setC(regs.res(regs.getC(), 5));
+						return 8;
+					}
+					case 0xaa:{ //res 5, d
+						regs.setD(regs.res(regs.getD(), 5));
+						return 8;
+					}
+					case 0xab:{ //res 5, e
+						regs.setE(regs.res(regs.getE(), 5));
+						return 8;
+					}
+					case 0xac:{ //res 5, h
+						regs.setH(regs.res(regs.getH(), 5));
+						return 8;
+					}
+					case 0xad:{ //res 5, l
+						regs.setL(regs.res(regs.getL(), 5));
+						return 8;
+					}
+					case 0xae:{ //res 5, (hl)
+						mmu.write(regs.getHL(), regs.res(mmu.read(regs.getHL()), 5));
+						return 16;
+					}
+					case 0xaf:{ //res 5, a
+						regs.setA(regs.res(regs.getA(), 5));
+						return 8;
+					}
+					case 0xb0:{ //res 6, b
+						regs.setB(regs.res(regs.getB(), 6));
+						return 8;
+					}
+					case 0xb1:{ //res 6, c
+						regs.setC(regs.res(regs.getC(), 6));
+						return 8;
+					}
+					case 0xb2:{ //res 6, d
+						regs.setD(regs.res(regs.getD(), 6));
+						return 8;
+					}
+					case 0xb3:{ //res 6, e
+						regs.setE(regs.res(regs.getE(), 6));
+						return 8;
+					}
+					case 0xb4:{ //res 6, h
+						regs.setH(regs.res(regs.getH(), 6));
+						return 8;
+					}
+					case 0xb5:{ //res 6, l
+						regs.setL(regs.res(regs.getL(), 6));
+						return 8;
+					}
+					case 0xb6:{ //res 6, (hl)
+						mmu.write(regs.getHL(), regs.res(mmu.read(regs.getHL()), 6));
+						return 16;
+					}
+					case 0xb7:{ //res 6, a
+						regs.setA(regs.res(regs.getA(), 6));
+						return 8;
+					}
+					case 0xb8:{ //res 7, b
+						regs.setB(regs.res(regs.getB(), 7));
+						return 8;
+					}
+					case 0xb9:{ //res 7, c
+						regs.setC(regs.res(regs.getC(), 7));
+						return 8;
+					}
+					case 0xba:{ //res 7, d
+						regs.setD(regs.res(regs.getD(), 7));
+						return 8;
+					}
+					case 0xbb:{ //res 7, e
+						regs.setE(regs.res(regs.getE(), 7));
+						return 8;
+					}
+					case 0xbc:{ //res 7, h
+						regs.setH(regs.res(regs.getH(), 7));
+						return 8;
+					}
+					case 0xbd:{ //res 7, l
+						regs.setL(regs.res(regs.getL(), 7));
+						return 8;
+					}
+					case 0xbe:{ //res 7, (hl)
+						mmu.write(regs.getHL(), regs.res(mmu.read(regs.getHL()), 7));
+						return 16;
+					}
+					case 0xbf:{ //res 7, a
+						regs.setA(regs.res(regs.getA(), 7));
+						return 8;
+					}
+					case 0xc0:{ //set 0, b
+						regs.setB(regs.set(regs.getB(), 0));
+						return 8;
+					}
+					case 0xc1:{ //set 0, c
+						regs.setC(regs.set(regs.getC(), 0));
+						return 8;
+					}
+					case 0xc2:{ //set 0, d
+						regs.setD(regs.set(regs.getD(), 0));
+						return 8;
+					}
+					case 0xc3:{ //set 0, e
+						regs.setE(regs.set(regs.getE(), 0));
+						return 8;
+					}
+					case 0xc4:{ //set 0, h
+						regs.setH(regs.set(regs.getH(), 0));
+						return 8;
+					}
+					case 0xc5:{ //set 0, l
+						regs.setL(regs.set(regs.getL(), 0));
+						return 8;
+					}
+					case 0xc6:{ //set 0, (hl)
+						mmu.write(regs.getHL(), regs.set(mmu.read(regs.getHL()), 0));
+						return 16;
+					}
+					case 0xc7:{ //set 0, a
+						regs.setA(regs.set(regs.getA(), 0));
+						return 8;
+					}
+					case 0xc8:{ //set 1, b
+						regs.setB(regs.set(regs.getB(), 1));
+						return 8;
+					}
+					case 0xc9:{ //set 1, c
+						regs.setC(regs.set(regs.getC(), 1));
+						return 8;
+					}
+					case 0xca:{ //set 1, d
+						regs.setD(regs.set(regs.getD(), 1));
+						return 8;
+					}
+					case 0xcb:{ //set 1, e
+						regs.setE(regs.set(regs.getE(), 1));
+						return 8;
+					}
+					case 0xcc:{ //set 1, h
+						regs.setH(regs.set(regs.getH(), 1));
+						return 8;
+					}
+					case 0xcd:{ //set 1, l
+						regs.setL(regs.set(regs.getL(), 1));
+						return 8;
+					}
+					case 0xce:{ //set 1, (hl)
+						mmu.write(regs.getHL(), regs.set(mmu.read(regs.getHL()), 1));
+						return 16;
+					}
+					case 0xcf:{ //set 1, a
+						regs.setA(regs.set(regs.getA(), 1));
+						return 8;
+					}
+					case 0xd0:{ //set 2, b
+						regs.setB(regs.set(regs.getB(), 2));
+						return 8;
+					}
+					case 0xd1:{ //set 2, c
+						regs.setC(regs.set(regs.getC(), 2));
+						return 8;
+					}
+					case 0xd2:{ //set 2, d
+						regs.setD(regs.set(regs.getD(), 2));
+						return 8;
+					}
+					case 0xd3:{ //set 2, e
+						regs.setE(regs.set(regs.getE(), 2));
+						return 8;
+					}
+					case 0xd4:{ //set 2, h
+						regs.setH(regs.set(regs.getH(), 2));
+						return 8;
+					}
+					case 0xd5:{ //set 2, l
+						regs.setL(regs.set(regs.getL(), 2));
+						return 8;
+					}
+					case 0xd6:{ //set 2, (hl)
+						mmu.write(regs.getHL(), regs.set(mmu.read(regs.getHL()), 2));
+						return 16;
+					}
+					case 0xd7:{ //set 2, a
+						regs.setA(regs.set(regs.getA(), 2));
+						return 8;
+					}
+					case 0xd8:{ //set 3, b
+						regs.setB(regs.set(regs.getB(), 3));
+						return 8;
+					}
+					case 0xd9:{ //set 3, c
+						regs.setC(regs.set(regs.getC(), 3));
+						return 8;
+					}
+					case 0xda:{ //set 3, d
+						regs.setD(regs.set(regs.getD(), 3));
+						return 8;
+					}
+					case 0xdb:{ //set 3, e
+						regs.setE(regs.set(regs.getE(), 3));
+						return 8;
+					}
+					case 0xdc:{ //set 3, h
+						regs.setH(regs.set(regs.getH(), 3));
+						return 8;
+					}
+					case 0xdd:{ //set 3, l
+						regs.setL(regs.set(regs.getL(), 3));
+						return 8;
+					}
+					case 0xde:{ //set 3, (hl)
+						mmu.write(regs.getHL(), regs.set(mmu.read(regs.getHL()), 3));
+						return 16;
+					}
+					case 0xdf:{ //set 3, a
+						regs.setA(regs.set(regs.getA(), 3));
+						return 8;
+					}
+					case 0xe0:{ //set 4, b
+						regs.setB(regs.set(regs.getB(), 4));
+						return 8;
+					}
+					case 0xe1:{ //set 4, c
+						regs.setC(regs.set(regs.getC(), 4));
+						return 8;
+					}
+					case 0xe2:{ //set 4, d
+						regs.setD(regs.set(regs.getD(), 4));
+						return 8;
+					}
+					case 0xe3:{ //set 4, e
+						regs.setE(regs.set(regs.getE(), 4));
+						return 8;
+					}
+					case 0xe4:{ //set 4, h
+						regs.setH(regs.set(regs.getH(), 4));
+						return 8;
+					}
+					case 0xe5:{ //set 4, l
+						regs.setL(regs.set(regs.getL(), 4));
+						return 8;
+					}
+					case 0xe6:{ //set 4, (hl)
+						mmu.write(regs.getHL(), regs.set(mmu.read(regs.getHL()), 4));
+						return 16;
+					}
+					case 0xe7:{ //set 4, a
+						regs.setA(regs.set(regs.getA(), 4));
+						return 8;
+					}
+					case 0xe8:{ //set 5, b
+						regs.setB(regs.set(regs.getB(), 5));
+						return 8;
+					}
+					case 0xe9:{ //set 5, c
+						regs.setC(regs.set(regs.getC(), 5));
+						return 8;
+					}
+					case 0xea:{ //set 5, d
+						regs.setD(regs.set(regs.getD(), 5));
+						return 8;
+					}
+					case 0xeb:{ //set 5, e
+						regs.setE(regs.set(regs.getE(), 5));
+						return 8;
+					}
+					case 0xec:{ //set 5, h
+						regs.setH(regs.set(regs.getH(), 5));
+						return 8;
+					}
+					case 0xed:{ //set 5, l
+						regs.setL(regs.set(regs.getL(), 5));
+						return 8;
+					}
+					case 0xee:{ //set 5, (hl)
+						mmu.write(regs.getHL(), regs.set(mmu.read(regs.getHL()), 5));
+						return 16;
+					}
+					case 0xef:{ //set 5, a
+						regs.setA(regs.set(regs.getA(), 5));
+						return 8;
+					}
+					case 0xf0:{ //set 6, b
+						regs.setB(regs.set(regs.getB(), 6));
+						return 8;
+					}
+					case 0xf1:{ //set 6, c
+						regs.setC(regs.set(regs.getC(), 6));
+						return 8;
+					}
+					case 0xf2:{ //set 6, d
+						regs.setD(regs.set(regs.getD(), 6));
+						return 8;
+					}
+					case 0xf3:{ //set 6, e
+						regs.setE(regs.set(regs.getE(), 6));
+						return 8;
+					}
+					case 0xf4:{ //set 6, h
+						regs.setH(regs.set(regs.getH(), 6));
+						return 8;
+					}
+					case 0xf5:{ //set 6, l
+						regs.setL(regs.set(regs.getL(), 6));
+						return 8;
+					}
+					case 0xf6:{ //set 6, (hl)
+						mmu.write(regs.getHL(), regs.set(mmu.read(regs.getHL()), 6));
+						return 16;
+					}
+					case 0xf7:{ //set 6, a
+						regs.setA(regs.set(regs.getA(), 6));
+						return 8;
+					}
+					case 0xf8:{ //set 7, b
+						regs.setB(regs.set(regs.getB(), 7));
+						return 8;
+					}
+					case 0xf9:{ //set 7, c
+						regs.setC(regs.set(regs.getC(), 7));
+						return 8;
+					}
+					case 0xfa:{ //set 7, d
+						regs.setD(regs.set(regs.getD(), 7));
+						return 8;
+					}
+					case 0xfb:{ //set 7, e
+						regs.setE(regs.set(regs.getE(), 7));
+						return 8;
+					}
+					case 0xfc:{ //set 7, h
+						regs.setH(regs.set(regs.getH(), 7));
+						return 8;
+					}
+					case 0xfd:{ //set 7, l
+						regs.setL(regs.set(regs.getL(), 7));
+						return 8;
+					}
+					case 0xfe:{ //set 7, (hl)
+						mmu.write(regs.getHL(), regs.set(mmu.read(regs.getHL()), 7));
+						return 16;
+					}
+					case 0xff:{ //set 7, a
+						regs.setA(regs.set(regs.getA(), 7));
+						return 8;
+					}
+
 					default:{
 						//System.out.println(toWord(regs.getSP()));
 						System.out.println("AF: " + toWord(regs.getAF()));

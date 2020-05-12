@@ -26,7 +26,7 @@ public class Generate {
 					fr.write(":{ //" + opcode.toLowerCase() + " " + toMod.toLowerCase() + "\n");
 					String set = toMod.equals("(HL)") ? "mmu.write(regs.getHL(), " : "regs.set" + toMod + "(";
 					String val = "regs." + opcode.toLowerCase() + "(";
-					val = toMod.equals("(HL)") ? val + "mmu.read(regs.getHL())" : val + "regs.get" + toMod + "()))";
+					val = toMod.equals("(HL)") ? val + "mmu.read(regs.getHL())))" : val + "regs.get" + toMod + "()))";
 					fr.write("\t" + set + val + ";\n");
 					fr.write("\treturn " + cycles + ";\n");
 					fr.write("}\n");
@@ -41,7 +41,7 @@ public class Generate {
 					fr.write(":{ //" + opcode.toLowerCase() + " " + index + ", " + toMod.toLowerCase() + "\n");
 					String set = toMod.equals("(HL)") ? "mmu.write(regs.getHL(), " : "regs.set" + toMod + "(";
 					set = opcode.equals("BIT") ? "" : set;
-					String val = toMod.equals("(HL)") ? "mmu.read(regs.getHL())" : "regs.get" + toMod + "(), " + index + ")";
+					String val = toMod.equals("(HL)") ? "mmu.read(regs.getHL())" + ", " + index + ")" : "regs.get" + toMod + "(), " + index + ")";
 					val = opcode.equals("BIT") ? val : val + ')';
 					fr.write("\t" + set + "regs." + opcode.toLowerCase() + "(" + val + ";\n");
 					fr.write("\treturn " + cycles + ";\n");

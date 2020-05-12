@@ -24,15 +24,11 @@ public class Gameboy {
 	}
 	
 	public void start() {
-		int stopper = 0;
 		while(true) {
 			int cycleIncrease = cpu.step();
 			ppu.step(cycleIncrease);
 			//ppu.step(0);
 			interrupt.step();
-			
-			stopper++;
-			//if(stopper > 100) break;
 		}
 	}
 }

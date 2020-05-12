@@ -23,7 +23,7 @@ case 0x05:{ //rlc l
 	return 8;
 }
 case 0x06:{ //rlc (hl)
-	mmu.write(regs.getHL(), regs.rlc(mmu.read(regs.getHL());
+	mmu.write(regs.getHL(), regs.rlc(mmu.read(regs.getHL())));
 	return 16;
 }
 case 0x07:{ //rlc a
@@ -55,7 +55,7 @@ case 0x0d:{ //rrc l
 	return 8;
 }
 case 0x0e:{ //rrc (hl)
-	mmu.write(regs.getHL(), regs.rrc(mmu.read(regs.getHL());
+	mmu.write(regs.getHL(), regs.rrc(mmu.read(regs.getHL())));
 	return 16;
 }
 case 0x0f:{ //rrc a
@@ -87,7 +87,7 @@ case 0x15:{ //rl l
 	return 8;
 }
 case 0x16:{ //rl (hl)
-	mmu.write(regs.getHL(), regs.rl(mmu.read(regs.getHL());
+	mmu.write(regs.getHL(), regs.rl(mmu.read(regs.getHL())));
 	return 16;
 }
 case 0x17:{ //rl a
@@ -119,7 +119,7 @@ case 0x1d:{ //rr l
 	return 8;
 }
 case 0x1e:{ //rr (hl)
-	mmu.write(regs.getHL(), regs.rr(mmu.read(regs.getHL());
+	mmu.write(regs.getHL(), regs.rr(mmu.read(regs.getHL())));
 	return 16;
 }
 case 0x1f:{ //rr a
@@ -151,7 +151,7 @@ case 0x25:{ //sla l
 	return 8;
 }
 case 0x26:{ //sla (hl)
-	mmu.write(regs.getHL(), regs.sla(mmu.read(regs.getHL());
+	mmu.write(regs.getHL(), regs.sla(mmu.read(regs.getHL())));
 	return 16;
 }
 case 0x27:{ //sla a
@@ -183,7 +183,7 @@ case 0x2d:{ //sra l
 	return 8;
 }
 case 0x2e:{ //sra (hl)
-	mmu.write(regs.getHL(), regs.sra(mmu.read(regs.getHL());
+	mmu.write(regs.getHL(), regs.sra(mmu.read(regs.getHL())));
 	return 16;
 }
 case 0x2f:{ //sra a
@@ -215,7 +215,7 @@ case 0x35:{ //swap l
 	return 8;
 }
 case 0x36:{ //swap (hl)
-	mmu.write(regs.getHL(), regs.swap(mmu.read(regs.getHL());
+	mmu.write(regs.getHL(), regs.swap(mmu.read(regs.getHL())));
 	return 16;
 }
 case 0x37:{ //swap a
@@ -247,7 +247,7 @@ case 0x3d:{ //srl l
 	return 8;
 }
 case 0x3e:{ //srl (hl)
-	mmu.write(regs.getHL(), regs.srl(mmu.read(regs.getHL());
+	mmu.write(regs.getHL(), regs.srl(mmu.read(regs.getHL())));
 	return 16;
 }
 case 0x3f:{ //srl a
@@ -279,7 +279,7 @@ case 0x45:{ //bit 0, l
 	return 8;
 }
 case 0x46:{ //bit 0, (hl)
-	regs.bit(mmu.read(regs.getHL());
+	regs.bit(mmu.read(regs.getHL()), 0);
 	return 16;
 }
 case 0x47:{ //bit 0, a
@@ -311,7 +311,7 @@ case 0x4d:{ //bit 1, l
 	return 8;
 }
 case 0x4e:{ //bit 1, (hl)
-	regs.bit(mmu.read(regs.getHL());
+	regs.bit(mmu.read(regs.getHL()), 1);
 	return 16;
 }
 case 0x4f:{ //bit 1, a
@@ -343,7 +343,7 @@ case 0x55:{ //bit 2, l
 	return 8;
 }
 case 0x56:{ //bit 2, (hl)
-	regs.bit(mmu.read(regs.getHL());
+	regs.bit(mmu.read(regs.getHL()), 2);
 	return 16;
 }
 case 0x57:{ //bit 2, a
@@ -375,7 +375,7 @@ case 0x5d:{ //bit 3, l
 	return 8;
 }
 case 0x5e:{ //bit 3, (hl)
-	regs.bit(mmu.read(regs.getHL());
+	regs.bit(mmu.read(regs.getHL()), 3);
 	return 16;
 }
 case 0x5f:{ //bit 3, a
@@ -407,7 +407,7 @@ case 0x65:{ //bit 4, l
 	return 8;
 }
 case 0x66:{ //bit 4, (hl)
-	regs.bit(mmu.read(regs.getHL());
+	regs.bit(mmu.read(regs.getHL()), 4);
 	return 16;
 }
 case 0x67:{ //bit 4, a
@@ -439,7 +439,7 @@ case 0x6d:{ //bit 5, l
 	return 8;
 }
 case 0x6e:{ //bit 5, (hl)
-	regs.bit(mmu.read(regs.getHL());
+	regs.bit(mmu.read(regs.getHL()), 5);
 	return 16;
 }
 case 0x6f:{ //bit 5, a
@@ -471,7 +471,7 @@ case 0x75:{ //bit 6, l
 	return 8;
 }
 case 0x76:{ //bit 6, (hl)
-	regs.bit(mmu.read(regs.getHL());
+	regs.bit(mmu.read(regs.getHL()), 6);
 	return 16;
 }
 case 0x77:{ //bit 6, a
@@ -503,7 +503,7 @@ case 0x7d:{ //bit 7, l
 	return 8;
 }
 case 0x7e:{ //bit 7, (hl)
-	regs.bit(mmu.read(regs.getHL());
+	regs.bit(mmu.read(regs.getHL()), 7);
 	return 16;
 }
 case 0x7f:{ //bit 7, a
@@ -535,7 +535,7 @@ case 0x85:{ //res 0, l
 	return 8;
 }
 case 0x86:{ //res 0, (hl)
-	mmu.write(regs.getHL(), regs.res(mmu.read(regs.getHL()));
+	mmu.write(regs.getHL(), regs.res(mmu.read(regs.getHL()), 0));
 	return 16;
 }
 case 0x87:{ //res 0, a
@@ -567,7 +567,7 @@ case 0x8d:{ //res 1, l
 	return 8;
 }
 case 0x8e:{ //res 1, (hl)
-	mmu.write(regs.getHL(), regs.res(mmu.read(regs.getHL()));
+	mmu.write(regs.getHL(), regs.res(mmu.read(regs.getHL()), 1));
 	return 16;
 }
 case 0x8f:{ //res 1, a
@@ -599,7 +599,7 @@ case 0x95:{ //res 2, l
 	return 8;
 }
 case 0x96:{ //res 2, (hl)
-	mmu.write(regs.getHL(), regs.res(mmu.read(regs.getHL()));
+	mmu.write(regs.getHL(), regs.res(mmu.read(regs.getHL()), 2));
 	return 16;
 }
 case 0x97:{ //res 2, a
@@ -631,7 +631,7 @@ case 0x9d:{ //res 3, l
 	return 8;
 }
 case 0x9e:{ //res 3, (hl)
-	mmu.write(regs.getHL(), regs.res(mmu.read(regs.getHL()));
+	mmu.write(regs.getHL(), regs.res(mmu.read(regs.getHL()), 3));
 	return 16;
 }
 case 0x9f:{ //res 3, a
@@ -663,7 +663,7 @@ case 0xa5:{ //res 4, l
 	return 8;
 }
 case 0xa6:{ //res 4, (hl)
-	mmu.write(regs.getHL(), regs.res(mmu.read(regs.getHL()));
+	mmu.write(regs.getHL(), regs.res(mmu.read(regs.getHL()), 4));
 	return 16;
 }
 case 0xa7:{ //res 4, a
@@ -695,7 +695,7 @@ case 0xad:{ //res 5, l
 	return 8;
 }
 case 0xae:{ //res 5, (hl)
-	mmu.write(regs.getHL(), regs.res(mmu.read(regs.getHL()));
+	mmu.write(regs.getHL(), regs.res(mmu.read(regs.getHL()), 5));
 	return 16;
 }
 case 0xaf:{ //res 5, a
@@ -727,7 +727,7 @@ case 0xb5:{ //res 6, l
 	return 8;
 }
 case 0xb6:{ //res 6, (hl)
-	mmu.write(regs.getHL(), regs.res(mmu.read(regs.getHL()));
+	mmu.write(regs.getHL(), regs.res(mmu.read(regs.getHL()), 6));
 	return 16;
 }
 case 0xb7:{ //res 6, a
@@ -759,7 +759,7 @@ case 0xbd:{ //res 7, l
 	return 8;
 }
 case 0xbe:{ //res 7, (hl)
-	mmu.write(regs.getHL(), regs.res(mmu.read(regs.getHL()));
+	mmu.write(regs.getHL(), regs.res(mmu.read(regs.getHL()), 7));
 	return 16;
 }
 case 0xbf:{ //res 7, a
@@ -791,7 +791,7 @@ case 0xc5:{ //set 0, l
 	return 8;
 }
 case 0xc6:{ //set 0, (hl)
-	mmu.write(regs.getHL(), regs.set(mmu.read(regs.getHL()));
+	mmu.write(regs.getHL(), regs.set(mmu.read(regs.getHL()), 0));
 	return 16;
 }
 case 0xc7:{ //set 0, a
@@ -823,7 +823,7 @@ case 0xcd:{ //set 1, l
 	return 8;
 }
 case 0xce:{ //set 1, (hl)
-	mmu.write(regs.getHL(), regs.set(mmu.read(regs.getHL()));
+	mmu.write(regs.getHL(), regs.set(mmu.read(regs.getHL()), 1));
 	return 16;
 }
 case 0xcf:{ //set 1, a
@@ -855,7 +855,7 @@ case 0xd5:{ //set 2, l
 	return 8;
 }
 case 0xd6:{ //set 2, (hl)
-	mmu.write(regs.getHL(), regs.set(mmu.read(regs.getHL()));
+	mmu.write(regs.getHL(), regs.set(mmu.read(regs.getHL()), 2));
 	return 16;
 }
 case 0xd7:{ //set 2, a
@@ -887,7 +887,7 @@ case 0xdd:{ //set 3, l
 	return 8;
 }
 case 0xde:{ //set 3, (hl)
-	mmu.write(regs.getHL(), regs.set(mmu.read(regs.getHL()));
+	mmu.write(regs.getHL(), regs.set(mmu.read(regs.getHL()), 3));
 	return 16;
 }
 case 0xdf:{ //set 3, a
@@ -919,7 +919,7 @@ case 0xe5:{ //set 4, l
 	return 8;
 }
 case 0xe6:{ //set 4, (hl)
-	mmu.write(regs.getHL(), regs.set(mmu.read(regs.getHL()));
+	mmu.write(regs.getHL(), regs.set(mmu.read(regs.getHL()), 4));
 	return 16;
 }
 case 0xe7:{ //set 4, a
@@ -951,7 +951,7 @@ case 0xed:{ //set 5, l
 	return 8;
 }
 case 0xee:{ //set 5, (hl)
-	mmu.write(regs.getHL(), regs.set(mmu.read(regs.getHL()));
+	mmu.write(regs.getHL(), regs.set(mmu.read(regs.getHL()), 5));
 	return 16;
 }
 case 0xef:{ //set 5, a
@@ -983,7 +983,7 @@ case 0xf5:{ //set 6, l
 	return 8;
 }
 case 0xf6:{ //set 6, (hl)
-	mmu.write(regs.getHL(), regs.set(mmu.read(regs.getHL()));
+	mmu.write(regs.getHL(), regs.set(mmu.read(regs.getHL()), 6));
 	return 16;
 }
 case 0xf7:{ //set 6, a
@@ -1015,7 +1015,7 @@ case 0xfd:{ //set 7, l
 	return 8;
 }
 case 0xfe:{ //set 7, (hl)
-	mmu.write(regs.getHL(), regs.set(mmu.read(regs.getHL()));
+	mmu.write(regs.getHL(), regs.set(mmu.read(regs.getHL()), 7));
 	return 16;
 }
 case 0xff:{ //set 7, a
