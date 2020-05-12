@@ -24,7 +24,7 @@ public class MMU {
 	private byte[] cart;
 	private int[][] tileSet0;
 	private int[][] tileSet1;
-	public int[][] tileMap0; //is this bad practice lol idk
+	public int[][] tileMap0; 
 	private int[][] returnTile; //used for getTile()
 	private int[] returnTileLine;
 	public boolean pause; //strictly for testing@!!!!!!!!!!!!!!!!
@@ -35,6 +35,7 @@ public class MMU {
 		tileSet0 = new int[1000][16]; //for now: starting from 8800, 1000 tiles x 16 bytes
 		tileSet1 = new int[1000][16];
 		tileMap0 = new int[32][32]; //for now: starting from 
+		tileMap0 = new int[32][32];	
 		returnTile = new int[8][8];
 		returnTileLine = new int[8];
 		ime = false;
@@ -52,7 +53,7 @@ public class MMU {
 			//pause = true;
 		}
 		if(0x0000 <= address && address < 0x8000) {
-			return; //can't write to rom i think?
+			return; //can't write to rom
 		}
 		if(0x8000 <= address && address < 0x9000) { 
 			int index1 = (address - 0x8000)/16;
@@ -69,12 +70,16 @@ public class MMU {
 			int index2 = (address - 0x9000)% 16;
 			tileSet1[index1][index2] = val % 256;
 		}
-		if(0x9800 <= address && address <= 0x9bff) {//tileMap #0 (just using this for now)
+		if(0x9800 <= address && address <= 0x9bff) {//tileMap #0 
 			int index1 = (address - 0x9800)/32;
-			int index2 = (address - 0x8000)% 32;
+			int index2 = (address - 0x9800)% 32;
 			tileMap0[index1][index2] = val % 256;
 		}
-		
+		if(0x9c00 <= address && address <= 0x9fff) {//tileMap #0 (just using this for now)
+			int index1 = (address - 0x9c00)/32;
+			int index2 = (address - 0x9c00)% 32;
+			tileMap0[index1][index2] = val % 256;
+		}
 		if(address == 0xff46) {
 			for(int i = 0; i < 160; i++)
 				write(0xfe00 + i, read((val << 8) + i));
@@ -95,7 +100,7 @@ public class MMU {
 		return Byte.toUnsignedInt(memory[address]);
 	}
 
-	public int[][] getTile(int index) {
+	public int[][] getTile(int index) {//used for sprites
 		//using returnTile to return
 		int[][]tileSet = tileSet0; //i think having sprites using tileSet0 directly should be ok
 		//System.out.println(Integer.toBinaryString(read(0xff40)));
@@ -157,40 +162,4 @@ public class MMU {
 			e.printStackTrace();
 		}
 	}
-	/*
-	public void printBackground() {//for testing
-		int [][] result = new int[32*8][32*8];
-		for(int i = 0; i < 32; i++) {
-			for(int j = 0; j < 32; j++) {
-				int[][]temp = getTile(tileMap0[i][j]);
-				for(int a = 8; a < 0; a++) {
-					for(int b = 8; b < 0; b++) {
-						result[i*8 + a][j*8 + b] = temp[a][b];
-					}
-				}
-			}
-		}
-		for(int i = 0; i < result.length; i++) {
-			for(int j = 0; j < result[i].length; j++) {
-				System.out.print(result[i][j]);
-			}
-			System.out.println();
-		}
-	}
-	
-	public void backgroundSum() {
-		int sum = 0;
-		for(int i = 0; i < 32; i++) {
-			for(int j = 0; j < 32; j++) {
-				int[][]temp = getTile(tileMap0[i][j]);
-				for(int k = 0; k < 8; k++) {
-					for(int l = 0; l < 8; l++) {
-						sum += temp[k][l];
-					}
-				}
-			}
-		}
-		System.out.println(sum);
-	}
-	*/
 }

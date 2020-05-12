@@ -149,7 +149,7 @@ public class PPU {
 					int[][]currentTile = mmu.getTile(id);
 					for(int iterY = startY; (iterY < 8 && iterY >= 0); iterY += incY) {
 						for(int iterX = startX; (iterX < 8 && iterX >= 0); iterX += incX) {
-							if(windowBuffer[y + iterY][x + iterX] == 0) {
+							if((y + iterY) < 145 && (x + iterX) < 161 && windowBuffer[y + iterY][x + iterX] == 0) {
 								int pixel = currentTile[iterY][iterX];
 								int color = ((palette >> (2 * pixel + 1)) % 2) * 2 + ((palette >> (2 * pixel)) % 2);
 								if(pixel != 0 && (y + iterY) < 145 && (x + iterX) < 161)

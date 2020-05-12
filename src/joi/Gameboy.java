@@ -11,7 +11,7 @@ public class Gameboy {
 
 	public static void main(String[] args) {
 		System.out.println("Hello world");
-		Gameboy gb = new Gameboy("drmario.gb");
+		Gameboy gb = new Gameboy("tetris.gb");
 		gb.start();
 	}
 	
