@@ -23,6 +23,9 @@ public class Display extends JPanel{
 	int height = 144*mult;
 	boolean painting = false;
 	
+	Joypad joypad;
+	MMU mmu;
+	
 	Color[] colors = new Color[4];{
 		colors[0]=Color.WHITE;
 		colors[1]=Color.LIGHT_GRAY;
@@ -30,9 +33,12 @@ public class Display extends JPanel{
 		colors[3]=Color.BLACK;
 	}
 	
-    public Display(int w, int h) {
+    public Display(int w, int h, MMU m) {
     	canvas = new BufferedImage(width*mult, height*mult, BufferedImage.TYPE_INT_BGR);
 		g = canvas.getGraphics();
+		joypad = new Joypad(m);
+		this.addKeyListener(joypad);
+		this.setFocusable(true);
     }
     
     public void clear(){

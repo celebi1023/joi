@@ -1,9 +1,12 @@
 package joi;
 
 import java.io.IOException;
+
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+
+import java.util.Random;
 
 public class MMU {
 	// various MMU components: WRAM, VRAM, etc.
@@ -29,6 +32,11 @@ public class MMU {
 	private int[] returnTileLine;
 	public boolean pause; //strictly for testing@!!!!!!!!!!!!!!!!
 	private boolean ime;
+	//joypad, keys[1] = button, keys[0] = direction
+	private int[][] keys;
+	private int keyIndex;
+	//0xff04 - replaces timer for tetris
+	private Random rand;
 	
 	public MMU(String fileName) {
 		memory = new byte[0x10000];
@@ -41,11 +49,22 @@ public class MMU {
 		ime = false;
 		openRom(fileName);
 		pause = false;
+		keys = new int[2][4];
+		keys[0] = new int[4];
+		Arrays.fill(keys[0], 1);
+		keys[1] = new int[4];
+		Arrays.fill(keys[1], 1);
+		keyIndex = 0;
+		rand = new Random();
 	}
 	
 	public void enableIME() {ime = true;}
 	public void disableIME() {ime = false;}
 	public boolean getIME() {return ime;}
+	
+	public void setKey(int val, int array, int index) {
+		keys[array][index] = val;
+	}
 	
 	public void write(int address, int val) {
 		if(address == 0xff05) {
@@ -85,6 +104,15 @@ public class MMU {
 				write(0xfe00 + i, read((val << 8) + i));
 		}
 		
+		if(address == 0xff00) {
+			if((Byte.toUnsignedInt(memory[0xff00]) >> 5) % 2 == 0) {//button select
+				keyIndex = 1;
+			}
+			else if((Byte.toUnsignedInt(memory[0xff00]) >> 4) % 2 == 0) {//direction select
+				keyIndex = 0;
+			}
+		}
+		
 		memory[address] = (byte) val;
 	}
 	
@@ -92,9 +120,20 @@ public class MMU {
 		if(Byte.toUnsignedInt(memory[0xff50]) != 1 && address < 0x0100)
 			return Byte.toUnsignedInt(boot[address]);
 		
-		if(address == 0xff00) { //joypad, will return 1111 for now
-			//gonna do this for now
-			return ((Byte.toUnsignedInt(memory[address])) | 0b11001111); //TODO
+		if(address == 0xff00) { 
+			int result = 0;
+			result += (1 << 7);
+			result += (1 << 6);
+			result += (1 << 5) * keyIndex;
+			result += (1 << 4) * (1 - keyIndex);
+			for(int i = 3; i >= 0; i--)
+				result += keys[keyIndex][i] * (1 << i);
+			//System.out.println(Integer.toBinaryString(result));
+			return result;
+		}
+		
+		if(address == 0xff04) {
+			return rand.nextInt(256);
 		}
 		
 		return Byte.toUnsignedInt(memory[address]);

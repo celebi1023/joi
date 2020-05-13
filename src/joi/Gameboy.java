@@ -1,17 +1,16 @@
 package joi;
 
-import java.io.IOException;
-
-public class Gameboy {
+public class Gameboy{
 	
 	private Cpu cpu;
 	private PPU ppu;
 	private Interrupt interrupt;
+	private Joypad joypad;
 	//static boolean pause = false; //strictly for testing
 
 	public static void main(String[] args) {
 		System.out.println("Hello world");
-		Gameboy gb = new Gameboy("tetris.gb");
+		Gameboy gb = new Gameboy("drmario.gb");
 		gb.start();
 	}
 	
@@ -21,6 +20,7 @@ public class Gameboy {
 		cpu = new Cpu(memory, registers);
 		ppu = new PPU(memory);
 		interrupt = new Interrupt(memory, registers);
+		joypad = new Joypad(memory);
 	}
 	
 	public void start() {
