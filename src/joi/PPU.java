@@ -114,13 +114,15 @@ public class PPU {
 		//render background
 		int x = mmu.read(scrollX);
 		int y = mmu.read(scrollY) + scanline;
+		if(x >= 256 || y >= 256)
+			return;
+		//System.out.println(x + " " + y + " " + scanline);
 		int[] currentTileLine = mmu.getTileLine(mmu.tileMap0[y/8][x/8], y % 8);
 		for(int i = 0; i < 160; i++) {
 			if((x + i) % 8 == 0) {
 				currentTileLine = mmu.getTileLine(mmu.tileMap0[y/8][(x + i)/8], y % 8);
 			}
 			int pixel = currentTileLine[(x + i) % 8];
-			
 			int palette = mmu.read(0xff47);
 			windowBuffer[scanline][i] = ((palette >> (2 * pixel + 1)) % 2) * 2 + ((palette >> (2 * pixel)) % 2);
 		}

@@ -37,6 +37,7 @@ public class MMU {
 	private int keyIndex;
 	//0xff04 - replaces timer for tetris
 	private Random rand;
+	private boolean useBoot;
 	
 	public MMU(String fileName) {
 		memory = new byte[0x10000];
@@ -56,6 +57,7 @@ public class MMU {
 		Arrays.fill(keys[1], 1);
 		keyIndex = 0;
 		rand = new Random();
+		useBoot = false;
 	}
 	
 	public void enableIME() {ime = true;}
@@ -100,8 +102,9 @@ public class MMU {
 			tileMap0[index1][index2] = val % 256;
 		}
 		if(address == 0xff46) {
-			for(int i = 0; i < 160; i++)
+			for(int i = 0; i < 160; i++) {
 				write(0xfe00 + i, read((val << 8) + i));
+			}
 		}
 		
 		if(address == 0xff00) {
@@ -117,7 +120,7 @@ public class MMU {
 	}
 	
 	public int read(int address) {
-		if(Byte.toUnsignedInt(memory[0xff50]) != 1 && address < 0x0100)
+		if((Byte.toUnsignedInt(memory[0xff50]) != 1 && useBoot) && address < 0x0100)
 			return Byte.toUnsignedInt(boot[address]);
 		
 		if(address == 0xff00) { 
@@ -136,6 +139,9 @@ public class MMU {
 			return rand.nextInt(256);
 		}
 		
+		//temp fix
+		if(address > 0xffff)
+			return 0;
 		return Byte.toUnsignedInt(memory[address]);
 	}
 
@@ -184,7 +190,8 @@ public class MMU {
 			for(int i = 0; i < 0x8000; i++) {
 				memory[i] = cart[i];
 			}
-			for(int i = 0; i < cart.length; i++) {
+			for(int i = 0; i < cart.length && i < 0x10000; i++) {
+				//System.out.println(Integer.toHexString(i) + " " + Integer.toHexString(cart[i]));
 				write(i, Byte.toUnsignedInt(cart[i]));
 			}
 			System.out.println("Successfully loaded cartridge into memory");
@@ -194,6 +201,7 @@ public class MMU {
 			String startup = "DMG_ROM.bin";
 			//startup = "BootRomMod.bin";
 			boot = Files.readAllBytes(Paths.get("./roms/" + startup));
+			useBoot = true;
 			System.out.println("Successfully loaded bootrom into memory");
 
 			

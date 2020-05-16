@@ -299,6 +299,10 @@ public class Cpu {
 			}
 			
 		//load reg into reg
+			case 0xf9: {//ld sp, hl
+				regs.setSP(regs.getHL());
+				return 8;
+			}
 			case 0x7f: {//ld A, A
 				regs.setA(regs.getA());
 				return 4;
@@ -497,6 +501,10 @@ public class Cpu {
 			}
 			
 		//load reg to mem
+			case 0x08: {//ld (nn), sp
+				mmu.write(fetchWord(), regs.getSP());
+				return 20;
+			}
 			case 0x02: { //ld (bc), a
 				mmu.write(regs.getBC(), regs.getA());
 				return 8;
@@ -934,6 +942,10 @@ public class Cpu {
 			}
 			case 0x17: {//rla
 				regs.setA(regs.rl(regs.getA()));
+				return 4;
+			}
+			case 0x1f: {//rra
+				regs.setA(regs.rr(regs.getA()));
 				return 4;
 			}
 		//compliment
