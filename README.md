@@ -1,3 +1,3 @@
 # joi
 Gameboy emulator in java
-[My image](celebi1023.github.com/joi/pictures/Capture (2).PNG)
+![alt text](https://github.com/celebi1023/joi/blob/master/pictures/Capture%20(2).PNG?raw=true)
