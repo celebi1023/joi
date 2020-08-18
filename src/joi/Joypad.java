@@ -12,7 +12,6 @@ public class Joypad implements KeyListener{
 	
 	public void keyPressed(KeyEvent e) {
 		System.out.println("pressed~!");
-		//System.exit(1);
 		int key = e.getKeyCode();
 		switch(key){
 			case KeyEvent.VK_DOWN:{//down
@@ -54,7 +53,6 @@ public class Joypad implements KeyListener{
 	}
 	@Override
 	public void keyReleased(KeyEvent e) {
-		//System.exit(1);
 		int key = e.getKeyCode();
 		switch(key){
 			case KeyEvent.VK_DOWN:{//down

@@ -35,7 +35,6 @@ public class Cpu {
 	
 	public void pushByte(int val) {
 		regs.setSP(regs.getSP() - 1);
-		//System.out.println("sp: " + Integer.toHexString(regs.getSP()) + " val: " + Integer.toHexString(val));
 		mmu.write(regs.getSP(), val);
 	}
 	
@@ -73,18 +72,6 @@ public class Cpu {
 	//returns number of cycles running the instruction took
 	public int step() {
 		int opCode = fetchByte();
-		/*
-		if(mmu.pause) {
-			System.out.println(Integer.toHexString(regs.getPC()));
-			System.exit(1);
-		}
-		*/
-		/*
-		System.out.print("Current ins: " + Integer.toHexString(opCode));
-		System.out.print("\t   Current PC: " + Integer.toHexString(regs.getPC() - 1));
-		System.out.print("\tzsfc: " + regs.getZSHC());
-		System.out.println("\tdesired reg: " + Integer.toHexString(regs.getC()));
-		*/
 		
 		if(regs.getPC() - 1 == 0xaaaaaa) {
 			counter = 20;
@@ -96,24 +83,6 @@ public class Cpu {
 		
 		if(counter == 0)
 			System.exit(1);
-		
-		/*
-		if(regs.getPC() - 1 == 0x40) {
-			//System.out.print(Integer.toHexString(mmu.read(regs.getSP() + 1)));
-			//System.out.println(Integer.toHexString(mmu.read(regs.getSP())));
-			//System.out.println(Integer.toHexString(mmu.read(regs.getSP() + 1) * 256 + mmu.read(regs.getSP())));
-			if(mmu.read(regs.getSP() + 1) * 256 +  mmu.read(regs.getSP()) == 0xd98) {
-				//System.out.println("SP: " + Integer.toHexString(regs.getSP()));
-				try {
-					fr.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				System.exit(1);
-			}
-		}
-		*/
 		
 		
 		
@@ -2164,7 +2133,6 @@ public class Cpu {
 					}
 
 					default:{
-						//System.out.println(toWord(regs.getSP()));
 						System.out.println("AF: " + toWord(regs.getAF()));
 						System.out.println("BC: " + toWord(regs.getBC()));
 						System.out.println("DE: " + toWord(regs.getDE()));
@@ -2192,8 +2160,6 @@ public class Cpu {
 			}
 			
 			default:
-				//System.out.println("carry : " + regs.getCarry() + " " + Integer.toBinaryString(regs.rotateByteRightCarry(0b10110111)) + " carry : " + regs.getCarry());
-				//System.out.println(toWord(regs.getSP()));
 				System.out.println("AF: " + toWord(regs.getAF()));
 				System.out.println("BC: " + toWord(regs.getBC()));
 				System.out.println("DE: " + toWord(regs.getDE()));
@@ -2203,12 +2169,6 @@ public class Cpu {
 				
 				System.out.println("ff40 :" + Integer.toHexString(mmu.read(0xff40)));
 				System.exit(1);
-				/*
-				for(int i = 0x9800; i < 0x9bff; i++)
-					System.out.println(Integer.toHexString(mmu.read(i)) + "   " + Integer.toHexString(i));
-				System.out.println(Integer.toHexString(mmu.read(0x8014)) + "   " + Integer.toHexString(0x8014));
-				System.out.println(Integer.toBinaryString(mmu.read(0xff40)));
-				*/
 
 		}
 		

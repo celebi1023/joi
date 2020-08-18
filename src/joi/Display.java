@@ -102,7 +102,7 @@ public class Display extends JPanel{
    
     public void showAsFrame(){
 		if(frame == null){
-			frame = new JFrame("GB Emulator Test");
+			frame = new JFrame("JOI Emulator");
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			frame.getContentPane().add(this);
 			frame.setResizable(true);;

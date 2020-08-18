@@ -40,7 +40,7 @@ public class PPU {
 	public PPU(MMU m) {
 		mmu = m;
 		monitor = new Display(160, 144, m);
-		mode = modeOAM; //no idea
+		mode = modeOAM; 
 		windowBuffer = new int[144][160];
 		
 		test1 = 0;
@@ -48,8 +48,7 @@ public class PPU {
 		time2 = 0;
 	}
 
-	public void step(int cycleIncrease) { //cycle increase could be incorrect, gonna use it like this for now
-		//System.out.println("\t\t\t\t\t\t\t\t\tcycles: " + cycles + " scanline: " + scanline + " mode: " + mode);
+	public void step(int cycleIncrease) {
 		cycles += cycleIncrease;
 		switch(mode) {
 			case modeOAM: {
@@ -116,7 +115,6 @@ public class PPU {
 		int y = mmu.read(scrollY) + scanline;
 		if(x >= 256 || y >= 256)
 			return;
-		//System.out.println(x + " " + y + " " + scanline);
 		int[] currentTileLine = mmu.getTileLine(mmu.tileMap0[y/8][x/8], y % 8);
 		for(int i = 0; i < 160; i++) {
 			if((x + i) % 8 == 0) {
@@ -130,7 +128,6 @@ public class PPU {
 	
 	private void updateSprites() {
 		//first make a pass of priority 1
-		//not worrying about other priority for now TODO
 		for(int i = 0; i < 40; i++) {
 			int y = mmu.read(0xfe00 + 4*i);
 			int x = mmu.read(0xfe00 + 4*i + 1);
@@ -166,7 +163,6 @@ public class PPU {
 		for(int i = 0; i < 40; i++) {
 			int y = mmu.read(0xfe00 + 4*i);
 			int x = mmu.read(0xfe00 + 4*i + 1);
-			//System.out.println(Integer.toHexString(0xfe00 + 4*i) + " y: " + y + " x: " + x);
 			if(y != 0 && x != 0) {
 				y = y - 16;
 				x = x - 8;

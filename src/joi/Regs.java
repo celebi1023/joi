@@ -26,8 +26,7 @@ public class Regs {
 		h = 0x01;
 		l = 0x4D;
 		sp = 0xFFFE;
-		pc = 0x0000; //changing for testing 
-		//pc = 0x0100;
+		pc = 0x0000; 
 		zero = true;
 		sub = false;
 		half = true;
@@ -48,7 +47,7 @@ public class Regs {
 	public void setL(int val)	{l = val(val);}
 	public void setSP(int val)	{sp = val;}
 	public void setPC(int val)	{pc = val;}
-	public void setCarry(boolean b) {carry = b;} //just for testing
+	public void setCarry(boolean b) {carry = b;}
 	
 	public void setAF(int val) {
 		a = val/256;
@@ -112,15 +111,6 @@ public class Regs {
 		if(carry) f = f | 0b00010000;
 		else f = f & 0b11101111;
 	}
-	/*
-	public int setFlags(int val) {
-		zero = val % 256 == 0;
-		sub = false;
-		half = false;
-		carry = false;
-		updateF();
-		return val;
-	}*/
 	
 	public int subByte(int a, int b, boolean dec) {
 		zero = (a % 256) == (b % 256);
@@ -131,7 +121,7 @@ public class Regs {
 		return (a - b + 256) % 256;
 	}
 	
-	public int sbc(int a, int b_) { // to be checked
+	public int sbc(int a, int b_) {
 		int b = (b_ + getCarryInt() + 256) % 256;
 		zero = (a - b) % 256 == 0;
 		sub = true;
@@ -141,27 +131,16 @@ public class Regs {
 		return (a - b + 256) % 256;
 	}
 	
-	/*
-	public int subWord(int a, int b) {
-		zero = a == b;
-		sub = true;
-		half = (a % 256) < (b % 256);
-		carry = a < b;
-		updateF();
-		return (a - b + 256*256) % 256*256; 
-	}
-	*/
-	
 	public int addByte(int a, int b) {
 		zero = (a + b) % 256 == 0;
 		sub = false;
-		half = (a % 16) + (b % 16) > 16; //to be checked
-		carry = ((a + 256) % 256) + ((b + 256) % 256) > 255; //iffy, to be checked maybe
+		half = (a % 16) + (b % 16) > 16;
+		carry = ((a + 256) % 256) + ((b + 256) % 256) > 255;
 		updateF();
 		return (a + b) % 256;
 	}
 	
-	public int addWord(int a_, int b_) { //iffy, to be checked!!
+	public int addWord(int a_, int b_) { 
 		int a = (a_ + 65536) % 65536;
 		int b = (b_ + 65536) % 65536;
 		sub = false;
@@ -252,7 +231,6 @@ public class Regs {
 		sub = false;
 		half = true;
 		updateF();
-		//no carry then?
 	}
 	
 	public int or(int a, int b) {
@@ -303,7 +281,7 @@ public class Regs {
 		return result;
 	}
 	
-	public int res(int val, int bit) {//only for bytes, may have to change idk
+	public int res(int val, int bit) {//only for bytes
 		int toAnd = 0b11111111;
 		int toSub = 1 << bit;
 		toAnd -= toSub;
@@ -311,13 +289,13 @@ public class Regs {
 		return ((val + 256)%256) & toAnd;
 	}
 	
-	public int set(int val, int bit) {//to be checked
+	public int set(int val, int bit) {
 		int toOr = 1 << bit;
 		val = (val + 256) % 256;
 		return val | toOr;
 	}
 	
-	public int daa(int val) {//daa to be checked
+	public int daa(int val) {
 		int result = val;
 		if(!sub) {
 			if(carry || result > 0x99) {

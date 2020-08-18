@@ -30,7 +30,7 @@ public class MMU {
 	public int[][] tileMap0; 
 	private int[][] returnTile; //used for getTile()
 	private int[] returnTileLine;
-	public boolean pause; //strictly for testing@!!!!!!!!!!!!!!!!
+	public boolean pause; 
 	private boolean ime;
 	//joypad, keys[1] = button, keys[0] = direction
 	private int[][] keys;
@@ -41,9 +41,9 @@ public class MMU {
 	
 	public MMU(String fileName) {
 		memory = new byte[0x10000];
-		tileSet0 = new int[1000][16]; //for now: starting from 8800, 1000 tiles x 16 bytes
+		tileSet0 = new int[1000][16]; //starting from 8800, 1000 tiles x 16 bytes
 		tileSet1 = new int[1000][16];
-		tileMap0 = new int[32][32]; //for now: starting from 
+		tileMap0 = new int[32][32]; //starting from 
 		tileMap0 = new int[32][32];	
 		returnTile = new int[8][8];
 		returnTileLine = new int[8];
@@ -71,10 +71,9 @@ public class MMU {
 	public void write(int address, int val) {
 		if(address == 0xff05) {
 			System.out.println("loading into 0xff05: " + val);
-			//pause = true;
 		}
 		if(0x0000 <= address && address < 0x8000) {
-			return; //can't write to rom
+			return; 
 		}
 		if(0x8000 <= address && address < 0x9000) { 
 			int index1 = (address - 0x8000)/16;
@@ -96,7 +95,7 @@ public class MMU {
 			int index2 = (address - 0x9800)% 32;
 			tileMap0[index1][index2] = val % 256;
 		}
-		if(0x9c00 <= address && address <= 0x9fff) {//tileMap #0 (just using this for now)
+		if(0x9c00 <= address && address <= 0x9fff) {//tileMap #0 
 			int index1 = (address - 0x9c00)/32;
 			int index2 = (address - 0x9c00)% 32;
 			tileMap0[index1][index2] = val % 256;
@@ -131,7 +130,6 @@ public class MMU {
 			result += (1 << 4) * (1 - keyIndex);
 			for(int i = 3; i >= 0; i--)
 				result += keys[keyIndex][i] * (1 << i);
-			//System.out.println(Integer.toBinaryString(result));
 			return result;
 		}
 		
@@ -139,7 +137,6 @@ public class MMU {
 			return rand.nextInt(256);
 		}
 		
-		//temp fix
 		if(address > 0xffff)
 			return 0;
 		return Byte.toUnsignedInt(memory[address]);
@@ -147,8 +144,7 @@ public class MMU {
 
 	public int[][] getTile(int index) {//used for sprites
 		//using returnTile to return
-		int[][]tileSet = tileSet0; //i think having sprites using tileSet0 directly should be ok
-		//System.out.println(Integer.toBinaryString(read(0xff40)));
+		int[][]tileSet = tileSet0; 
 		for(int i = 0; i < 8; i++) {
 			String first = Integer.toBinaryString(tileSet[index][2*i]);
 			String second = Integer.toBinaryString(tileSet[index][2*i + 1]);
@@ -183,23 +179,18 @@ public class MMU {
 	
 	private void openRom(String fileName) {
 		try {
-			//absolute path to fix later
-			//cartridge
 			
 			cart = Files.readAllBytes(Paths.get("./roms/" + fileName));
 			for(int i = 0; i < 0x8000; i++) {
 				memory[i] = cart[i];
 			}
 			for(int i = 0; i < cart.length && i < 0x10000; i++) {
-				//System.out.println(Integer.toHexString(i) + " " + Integer.toHexString(cart[i]));
 				write(i, Byte.toUnsignedInt(cart[i]));
 			}
 			System.out.println("Successfully loaded cartridge into memory");
 			
 			
-			//commented out for testing
 			String startup = "DMG_ROM.bin";
-			//startup = "BootRomMod.bin";
 			boot = Files.readAllBytes(Paths.get("./roms/" + startup));
 			useBoot = true;
 			System.out.println("Successfully loaded bootrom into memory");

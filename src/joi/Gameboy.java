@@ -6,7 +6,6 @@ public class Gameboy{
 	private PPU ppu;
 	private Interrupt interrupt;
 	private Joypad joypad;
-	//static boolean pause = false; //strictly for testing
 
 	public static void main(String[] args) {
 		Gameboy gb = new Gameboy("tetris.gb");
@@ -26,7 +25,6 @@ public class Gameboy{
 		while(true) {
 			int cycleIncrease = cpu.step();
 			ppu.step(cycleIncrease);
-			//ppu.step(0);
 			interrupt.step();
 		}
 	}
